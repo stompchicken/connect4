@@ -32,11 +32,11 @@ Value minimax(const Connect4& board, int maxDepth) {
 
 TEST_F(PerfectTest, AlphaBeta) {
     Game game(16);
-    for(int i=0; i<100; i++) {
-        int startDepth = (rand() % 12) + 12;
-        int maxDepth = startDepth + (rand() % 6);
+    for(int i=0; i<10; i++) {
+        int startDepth = 16;
+        int maxDepth = startDepth + 4;
 
-        Connect4 board = genBoard(startDepth);
+        Connect4 board = Connect4::random(startDepth);
 
         Value minimaxValue = minimax(board, maxDepth);
         Value alphaBetaValue = game.alphaBeta(board, VALUE_MIN, VALUE_MAX, maxDepth);

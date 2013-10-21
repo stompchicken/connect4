@@ -3,15 +3,21 @@
 
 using namespace testing;
 
-class Connect4Test : public Test {};
+class Connect4Test : public Test {
+  public:
+    virtual void SetUp() {
+        srand(12);
+    }
+};
 
 TEST_F(Connect4Test, Parse) {
   for(int i=0; i<1000; i++) {
       Connect4 board = Connect4::random();
+      board.assertInvariants();
       Connect4 parsed = Connect4();
       parsed.parse(board.print(), board.getPlayer(), board.getDepth());
       parsed.assertInvariants();
-      ASSERT_EQ(board, parsed);
+      ASSERT_EQ(board, parsed) << i << std::endl << board.print() << " != " << parsed.print() << std::endl;;
   }
 }
 

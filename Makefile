@@ -2,7 +2,7 @@ GTEST=gtest-1.6.0
 
 CXX=clang++
 
-CFLAGS=-c -g -Wall -Weffc++ -pedantic -Wextra -Itest -std=c++11 -stdlib=libc++
+CFLAGS=-c -g -Wall -Weffc++ -pedantic -Wextra -Isrc -Itest -std=c++11 -stdlib=libc++
 CFLAGS_TEST=$(CFLAGS) -Isrc -Ibuild/$(GTEST)/include -DGTEST_USE_OWN_TR1_TUPLE=1
 
 LDFLAGS=-stdlib=libc++
@@ -10,7 +10,7 @@ LDFLAGS_TEST=$(LDFLAGS) -Lbuild/$(GTEST)/lib -lgtest
 
 .PHONY: gtest setup
 
-all: bin/noob bin/test_noob
+all: bin/noob bin/test_noob bin/bench_noob
 
 setup:
 	mkdir -p build/noob
@@ -48,6 +48,15 @@ build/noob/test_cache.o: test/test_cache.cpp
 
 build/noob/test_perfect.o: test/test_perfect.cpp
 	$(CXX) $(CFLAGS_TEST) test/test_perfect.cpp -o build/noob/test_perfect.o
+
+bin/bench_noob: setup build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/perfect.o build/noob/game.o
+	$(CXX) $(LDFLAGS) build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/perfect.o build/noob/game.o -o bin/bench_noob
+
+build/noob/bench_noob.o: benchmark/bench_noob.cpp
+	$(CXX) $(CFLAGS) benchmark/bench_noob.cpp -o build/noob/bench_noob.o
+
+build/noob/bench_pruning.o: benchmark/bench_pruning.cpp
+	$(CXX) $(CFLAGS) benchmark/bench_pruning.cpp -o build/noob/bench_pruning.o
 
 gtest: third-party/$(GTEST)/make/Makefile
 	mkdir -p build/$(GTEST)/lib

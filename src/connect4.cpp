@@ -76,11 +76,20 @@ Connect4& Connect4::operator=(const Connect4& other) {
     return *this;
 }
 
-Connect4 Connect4::random() {
-    uint64 p1 = randUint64();
-    uint64 p2 = randUint64();
-    Connect4 board(p1 & ~p2, p2 & ~p1, rand() % 2 == 0 ? PLAYER_MAX : PLAYER_MIN, (rand() % 2) + 1);
-    board.assertInvariants();
+Connect4 Connect4::random(uint moves) {
+    Connect4 board;
+    do {
+        board = Connect4();
+        for(uint i=0; i<moves; i++) {
+            Connect4 nodeBuffer[WIDTH];
+            board.children(nodeBuffer);
+            int offset = rand();
+            for(int j=0; j<WIDTH; j++) {
+                board = nodeBuffer[(j + offset) % WIDTH];
+                if(board.isValid()) break;
+            }
+        }
+    } while (board.evaluate() != VALUE_UNKNOWN);
     return board;
 }
 
@@ -271,7 +280,7 @@ uint64 Connect4::line4(uint64 b) const {
 
     return vertical || horizontal || diagLeft || diagRight;
 }
-
+/*
 Connect4 genBoard(int moves) {
     Connect4 board;
     do {
@@ -290,3 +299,4 @@ Connect4 genBoard(int moves) {
 
     return board;
 }
+*/

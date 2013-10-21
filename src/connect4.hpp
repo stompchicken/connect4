@@ -44,10 +44,10 @@ class Connect4 {
     bool operator==(const Connect4& rhs) const;
     bool operator!=(const Connect4& rhs) const;
 
-    static Connect4 random();
+    static Connect4 random(uint depth=16);
 
     inline uint64 hash() const { return xorHash; }
-    inline uint64 key() const { return xorHash;
+    inline uint64 key() const { return static_cast<uint32_t>(xorHash);
 /*
         uint64 base = 0;
         for(unsigned col=0; col<WIDTH; col++) {
@@ -96,13 +96,16 @@ class Connect4 {
     void makeMove(unsigned row, unsigned col);
 
     // Internal hashing class
+    // Partly to solve the problem of static initialisation of the keys
     struct Hasher {
         uint64 keys[(2*SIZE)+1];
 
         Hasher() {
+            Random* rand = new Random();
             for(int i=0; i<(2*SIZE)+1; i++) {
-                keys[i] = randUint64();
+                keys[i] = rand->gen_uint64();
             }
+            delete rand;
         }
 
         uint64 hash(uint64 p1_, uint64 p2_, int player_) const {
@@ -115,7 +118,7 @@ class Connect4 {
                     h ^= keys[SIZE+i];
                 }
             }
-            if(player_ == PLAYER_MAX) {
+            if(player_ == PLAYER_MIN) {
                 h ^= keys[2*SIZE];
             }
             return h;
@@ -131,9 +134,5 @@ class Connect4 {
     static Hasher hasher;
 
 };
-
-int popcount(uint64 x);
-uint64 makeZeroBarrier();
-Connect4 genBoard(int moves);
 
 #endif

@@ -43,7 +43,7 @@ int main(int argc, char* argv[]) {
     srand(seed);
 
     Game game(24);
-    Connect4 board = genBoard(depth);
+    Connect4 board = Connect4::random(depth);
     std::cout << board.print() << std::endl;
     Value value = game.alphaBeta(board, VALUE_MIN, VALUE_MAX, maxDepth);
     std::cout << "Value: " << value << std::endl;

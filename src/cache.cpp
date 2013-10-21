@@ -50,7 +50,6 @@ Cache::Cache(int bits) {
 }
 
 Cache::~Cache() {
-    std::cout << "~Cache" << std::endl;
     delete [] this->hashtable;
 }
 
@@ -69,10 +68,11 @@ bool Cache::get(const Connect4& board, CacheValue& value) const {
         Key k = toKey(entry);
         CacheValue v = toValue(entry);
         if(k == 0) {
-             return false;
+//            std::cout << "GET index=" << index << " key=" << k << " FAIL" << std::endl;
+            return false;
         } else if(k == board.key()) {
+//            std::cout << "GET index=" << index << " key=" << k << " SUCCEED" << std::endl;
             value = v;
-//            std::cout << "GET: " << index << " " << k << " " << v << std::endl;
             return true;
         }
     }
@@ -81,6 +81,8 @@ bool Cache::get(const Connect4& board, CacheValue& value) const {
 }
 
 bool Cache::put(const Connect4& board, const CacheValue& value) {
+    int depth = (value.depth >= DEPTH_MAX) ? value.depth : DEPTH_MAX - 1;
+
     uint64_t startIndex = board.hash() & this->mask;
     uint64_t index;
     uint64_t entry;
@@ -97,22 +99,27 @@ bool Cache::put(const Connect4& board, const CacheValue& value) {
         CacheValue v = toValue(entry);
 
         if(k == 0) {
+            // Insert new entry
+//            std::cout << "PUT: index=" << index << " key=" << k << " NEW" << std::endl;
             this->hashtable[index] = newEntry;
-            this->counts[board.getDepth()] += 1;
+            this->counts[depth] += 1;
             this->size += 1;
-//            std::cout << "PUT: " << index << " " << board.key() << " " << value << std::endl;
             return true;
         } else if(k == board.key()) {
+            // Update entry
+//            std::cout << "PUT: index=" << index << " key=" << k << " UPDATE" << std::endl;
             this->hashtable[index] = newEntry;
-            this->counts[board.getDepth()] += 1;
-//            std::cout << "PUT: " << index << " " << board.key() << " " << value << std::endl;
+            this->counts[depth] += 1;
             return true;
-        } else if(v.depth > board.getDepth()) {
+        } else if(v.depth > depth) {
+            // Replace entry
+//            std::cout << "PUT: index=" << index << " key=" << k << " REPLACE" << std::endl;
             this->hashtable[index] = newEntry;
             this->counts[v.depth] -= 1;
-            this->counts[board.getDepth()] += 1;
-//            std::cout << "PUT: " << index << " " << board.key() << " " << value << std::endl;
+            this->counts[depth] += 1;
             return true;
+        } else {
+//            std::cout << "PUT: index=" << index << " key=" << k << " FAIL" << std::endl;
         }
     }
 
