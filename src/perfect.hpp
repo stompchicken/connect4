@@ -39,6 +39,10 @@ class Game {
     Stats* stats;
     Connect4 buffer[DEPTH_MAX*WIDTH];
     Connect4* bufferStart;
+
+    Game(const Game& other);
+    Game& operator=(const Game& other);
+
 };
 
 
@@ -46,14 +50,14 @@ class NodeOrdering {
 
   public:
     NodeOrdering() {
-        for(int i=0; i<WIDTH; i++) {
+        for(unsigned i=0; i<WIDTH; i++) {
             ordering[i].index = i;
             ordering[i].score = 0;
         }
     }
 
     void increment(int index, int increment) {
-        for(int i=0; i<WIDTH; i++) {
+        for(unsigned i=0; i<WIDTH; i++) {
             if(ordering[i].index == index) {
                 ordering[i].score += increment;
 

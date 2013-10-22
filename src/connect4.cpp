@@ -39,21 +39,16 @@ uint64 makeZeroBarrier() {
 uint64 Connect4::zeroBarrier = makeZeroBarrier();
 Connect4::Hasher Connect4::hasher;
 
-Connect4::Connect4() {
-    p1 = 0;
-    p2 = 0;
-    depth = 0;
-    player = PLAYER_MAX;
+Connect4::Connect4() : p1(0), p2(0), player(PLAYER_MAX), depth(0) {
     std::fill(emptyPos, emptyPos+WIDTH, 0);
     xorHash = 0;
 
 }
 
-Connect4::Connect4(uint64 p1_, uint64 p2_, int player_, int depth_) {
-    this->p1 = p1_ & zeroBarrier;
-    this->p2 = p2_ & zeroBarrier;
-    this->player = player_;
-    this->depth = depth_;
+Connect4::Connect4(uint64 p1_, uint64 p2_, int player_, int depth_) : p1(p1_ & zeroBarrier),
+                                                                      p2(p2_ & zeroBarrier),
+                                                                      player(player_),
+                                                                      depth(depth_) {
     this->generateDerivedFields();
 }
 
@@ -80,11 +75,11 @@ Connect4 Connect4::random(Depth moves) {
     Connect4 board;
     do {
         board = Connect4();
-        for(uint i=0; i<moves; i++) {
+        for(unsigned i=0; i<moves; i++) {
             Connect4 nodeBuffer[WIDTH];
             board.children(nodeBuffer);
             int offset = rand();
-            for(int j=0; j<WIDTH; j++) {
+            for(unsigned j=0; j<WIDTH; j++) {
                 board = nodeBuffer[(j + offset) % WIDTH];
                 if(board.isValid()) break;
             }
@@ -219,7 +214,7 @@ std::ostream& operator<<(std::ostream& os, const Connect4& board) {
     os << "depth=" << board.depth << " ";
     os << "xorHash=" << board.xorHash << " ";
     os << "emptyPos=";
-    for(int i=0; i<WIDTH; i++) {
+    for(unsigned i=0; i<WIDTH; i++) {
         os << static_cast<int>(board.emptyPos[i]) << (i==WIDTH-1 ? "" : " ");
     }
     os << "}";

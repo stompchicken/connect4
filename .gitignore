@@ -1,3 +1,5 @@
 .DS_Store
 bin/
 build/
+*.o
+third-party/gtest-1.7.0/make/

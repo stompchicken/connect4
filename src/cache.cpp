@@ -34,12 +34,9 @@ CacheValue toValue(uint64_t entry) {
     return value;
 }
 
-Cache::Cache(int bits) {
-    this->mask = (static_cast<uint64_t>(1) << bits) - 1;
-
-    this->capacity = static_cast<uint64_t>(1) << bits;
-    this->size = 0;
-
+Cache::Cache(int bits) : mask((static_cast<uint64_t>(1) << bits) - 1),
+                         size(0),
+                         capacity(static_cast<uint64_t>(1) << bits) {
     // Zeroes all entries
     this->hashtable = new uint64_t[capacity]();
 

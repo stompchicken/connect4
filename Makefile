@@ -1,6 +1,6 @@
 GTEST=gtest-1.7.0
 
-CXX=clang++
+CXX=g++
 
 CFLAGS=-c -g -Wall -Isrc -Itest -pthread
 CFLAGS_NOOB=$(CFLAGS) -Weffc++ -pedantic -Wextra

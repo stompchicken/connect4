@@ -8,7 +8,7 @@
 #include "connect4.hpp"
 
 // Size of the linear probing before returning failure
-const static int probe = 8;
+const static uint probe = 8;
 
 typedef uint32 Key;
 
@@ -46,6 +46,9 @@ class Cache {
 
     // Debug stuff
     mutable int counts[DEPTH_MAX];
+
+    Cache(const Cache& other);
+    Cache& operator=(const Cache& other);
 };
 
 

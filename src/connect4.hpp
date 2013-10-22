@@ -6,9 +6,9 @@
 
 #include "game.hpp"
 
-const static int WIDTH = 7;
-const static int HEIGHT = 6;
-const static int SIZE = (HEIGHT+1) * WIDTH;
+const static unsigned WIDTH = 7;
+const static unsigned HEIGHT = 6;
+const static unsigned SIZE = (HEIGHT+1) * WIDTH;
 
 /*
 
@@ -102,14 +102,14 @@ class Connect4 {
         uint64 keys[(2*SIZE)+1];
 
         Hasher() {
-            for(int i=0; i<(2*SIZE)+1; i++) {
+            for(unsigned i=0; i<(2*SIZE)+1; i++) {
                 keys[i] = (static_cast<uint64>(rand()) << 32) | rand();
             }
         }
 
         uint64 hash(uint64 p1_, uint64 p2_, int player_) const {
             uint64 h = 0;
-            for(int i=0; i<SIZE; i++) {
+            for(unsigned i=0; i<SIZE; i++) {
                 if(p1_ & ((uint64)1 << i)) {
                     h ^= keys[i];
                 }
