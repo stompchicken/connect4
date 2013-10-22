@@ -8,7 +8,7 @@
 #include "connect4.hpp"
 
 // Size of the linear probing before returning failure
-const static uint probe = 8;
+const static uint64 probe = 8;
 
 typedef uint32 Key;
 
