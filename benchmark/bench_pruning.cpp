@@ -25,10 +25,10 @@ void benchmark_pruning() {
 
     for(size_t i=0; i<boards.size(); i++) {
         Game game(24);
-        auto start = std::clock();
+//        auto start = std::clock();
         game.alphaBeta(boards[i], VALUE_MIN, VALUE_MAX, 42);
-        auto end = std::clock();
-        std::cout << (end - start) / (double) CLOCKS_PER_SEC << ",";
+//        auto end = std::clock();
+//        std::cout << (end - start) / (double) CLOCKS_PER_SEC << ",";
     }
     std::cout << std::endl;
 }

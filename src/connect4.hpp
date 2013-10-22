@@ -2,6 +2,7 @@
 #define CONNECT4
 
 #include <iostream>
+#include <cstdlib>
 
 #include "game.hpp"
 
@@ -44,7 +45,7 @@ class Connect4 {
     bool operator==(const Connect4& rhs) const;
     bool operator!=(const Connect4& rhs) const;
 
-    static Connect4 random(uint depth=16);
+    static Connect4 random(Depth depth=16);
 
     inline uint64 hash() const { return xorHash; }
     inline uint64 key() const { return static_cast<uint32_t>(xorHash);
@@ -101,11 +102,9 @@ class Connect4 {
         uint64 keys[(2*SIZE)+1];
 
         Hasher() {
-            Random* rand = new Random();
             for(int i=0; i<(2*SIZE)+1; i++) {
-                keys[i] = rand->gen_uint64();
+                keys[i] = (static_cast<uint64>(rand()) << 32) | rand();
             }
-            delete rand;
         }
 
         uint64 hash(uint64 p1_, uint64 p2_, int player_) const {

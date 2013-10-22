@@ -76,7 +76,7 @@ Connect4& Connect4::operator=(const Connect4& other) {
     return *this;
 }
 
-Connect4 Connect4::random(uint moves) {
+Connect4 Connect4::random(Depth moves) {
     Connect4 board;
     do {
         board = Connect4();

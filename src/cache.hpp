@@ -10,7 +10,7 @@
 // Size of the linear probing before returning failure
 const static int probe = 8;
 
-typedef uint32_t Key;
+typedef uint32 Key;
 
 struct CacheValue {
     Value lower, upper;

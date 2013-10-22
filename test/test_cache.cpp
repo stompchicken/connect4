@@ -2,17 +2,11 @@
 #include "game.hpp"
 
 #include <gtest/gtest.h>
-#include <random>
 
 using namespace testing;
 
 class CacheTest : public Test {
   protected:
-    virtual void SetUp() {
-//        random.reset(new Random());
-//        random->seed(1234);
-    }
-
     CacheValue randomCacheValue() {
         CacheValue val;
         val.lower = rand() % 256;
@@ -21,10 +15,6 @@ class CacheTest : public Test {
         val.depth = rand() % DEPTH_MAX;
         return val;
     }
-
-  private:
-//    std::unique_ptr<Random> random;
-
 };
 
 

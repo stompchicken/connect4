@@ -20,8 +20,7 @@ struct Stats {
 
 class Game {
   public:
-    Game(int hashBits) : cache(new Cache(hashBits)), stats(new Stats()) {
-        bufferStart = buffer;
+    Game(int hashBits) : cache(new Cache(hashBits)), stats(new Stats()), bufferStart(buffer) {
     }
 
     ~Game() {
