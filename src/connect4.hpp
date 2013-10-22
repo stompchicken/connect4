@@ -4,7 +4,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include "game.hpp"
+#include "noob.hpp"
 
 const static unsigned WIDTH = 7;
 const static unsigned HEIGHT = 6;

@@ -4,13 +4,12 @@
 #include <stdint.h>
 #include <map>
 
-#include "game.hpp"
 #include "connect4.hpp"
 
 // Size of the linear probing before returning failure
-const static uint64 probe = 8;
+const static uint64_t probe = 8;
 
-typedef uint32 Key;
+typedef uint32_t Key;
 
 struct CacheValue {
     Value lower, upper;

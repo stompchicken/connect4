@@ -1,9 +1,9 @@
-#include "perfect.hpp"
+#include "game.hpp"
 #include "gtest/gtest.h"
 
 using namespace testing;
 
-class PerfectTest : public Test {};
+class GameTest : public Test {};
 
 Value minimax(const Connect4& board, int maxDepth) {
     Value value = board.evaluate();
@@ -30,7 +30,7 @@ Value minimax(const Connect4& board, int maxDepth) {
     }
 }
 
-TEST_F(PerfectTest, AlphaBeta) {
+TEST_F(GameTest, AlphaBeta) {
     Game game(16);
     for(int i=0; i<10; i++) {
         int startDepth = 16;

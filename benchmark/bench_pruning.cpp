@@ -4,14 +4,11 @@
 
 #include "connect4.hpp"
 #include "cache.hpp"
-#include "perfect.hpp"
+#include "game.hpp"
 
 
 void benchmark_pruning() {
-
-
     std::vector<Connect4> boards;
-
     boards.push_back(Connect4(22059759435905, 44152263917570, 1, 16));
     boards.push_back(Connect4(34632384535, 13263398076424, 1, 16));
     boards.push_back(Connect4(22093311852802, 43980735676549, 1, 16));

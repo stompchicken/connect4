@@ -1,33 +1,90 @@
 #ifndef GAME
 #define GAME
 
-#include <stdint.h>
+#include "noob.hpp"
+#include "connect4.hpp"
+#include "cache.hpp"
 
-#define PLAYER_INVALID 0
-#define PLAYER_MAX 1
-#define PLAYER_MIN 2
+struct Stats {
+    long nodesExplored;
+    long cacheHits;
+    long cacheMisses;
+    long cutoffs;
+    long terminalNodes;
+    bool complete;
 
-#include <iostream>
+    Stats() : nodesExplored(0), cacheHits(0), cacheMisses(0),
+              cutoffs(0), terminalNodes(0), complete(false) {}
 
-int flipPlayer(int player);
+    friend std::ostream& operator<<(std::ostream&, const Stats&);
+};
 
-typedef int Value;
-typedef uint64_t uint64;
-typedef uint32_t uint32;
-typedef uint8_t uint8;
+class Game {
+  public:
+    Game(int hashBits) : cache(new Cache(hashBits)), stats(new Stats()), bufferStart(buffer) {
+    }
 
-typedef uint8 Move;
-typedef uint8 Depth;
+    ~Game() {
+        delete cache;
+        delete stats;
+    }
 
-const static Value VALUE_UNKNOWN = 0;
-const static Value VALUE_MIN = 1;
-const static Value VALUE_MAX = 255;
-const static Value VALUE_DRAW = 128;
+    Value alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDepth);
+    void reset() {
+        cache->resetBounds();
+        bufferStart = buffer;
+    }
 
-const static Move MOVE_INVALID = 7;
+  private:
+    Cache* cache;
+    Stats* stats;
+    Connect4 buffer[DEPTH_MAX*WIDTH];
+    Connect4* bufferStart;
 
-Value flipValue(Value value);
+    Game(const Game& other);
+    Game& operator=(const Game& other);
 
-#define DEPTH_MAX 50
+};
+
+
+class NodeOrdering {
+
+  public:
+    NodeOrdering() {
+        for(unsigned i=0; i<WIDTH; i++) {
+            ordering[i].index = i;
+            ordering[i].score = 0;
+        }
+    }
+
+    void increment(int index, int increment) {
+        for(unsigned i=0; i<WIDTH; i++) {
+            if(ordering[i].index == index) {
+                ordering[i].score += increment;
+
+                // BUBBLE SORT IS THE BEST SORT
+                for(;i > 0 && ordering[i].score > ordering[i-1].score; i--) {
+                    std::swap(ordering[i], ordering[i-1]);
+                }
+
+                break;
+            }
+        }
+    }
+
+    int move(int i) const {
+        return ordering[i].index;
+    }
+
+  private:
+    struct NodeScore {
+        int index;
+        uint64 score;
+    };
+    NodeScore ordering[WIDTH];
+};
+
+
+
 
 #endif

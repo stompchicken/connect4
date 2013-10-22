@@ -1,7 +1,5 @@
 GTEST=gtest-1.7.0
 
-CXX=g++
-
 CFLAGS=-c -g -Wall -Isrc -Itest -pthread
 CFLAGS_NOOB=$(CFLAGS) -Weffc++ -pedantic -Wextra
 CFLAGS_TEST=$(CFLAGS) -Isrc -Ibuild/$(GTEST)/include
@@ -17,8 +15,8 @@ setup:
 	mkdir -p build/noob
 	mkdir -p bin
 
-bin/noob: setup build/noob/noob.o build/noob/connect4.o build/noob/cache.o build/noob/game.o build/noob/perfect.o
-	$(CXX) $(LDFLAGS) build/noob/noob.o build/noob/connect4.o build/noob/game.o build/noob/cache.o build/noob/perfect.o -o bin/noob
+bin/noob: setup build/noob/noob.o build/noob/connect4.o build/noob/cache.o build/noob/game.o
+	$(CXX) $(LDFLAGS) build/noob/noob.o build/noob/connect4.o build/noob/game.o build/noob/cache.o -o bin/noob
 
 build/noob/noob.o: src/noob.cpp
 	$(CXX) $(CFLAGS_NOOB) src/noob.cpp -o build/noob/noob.o
@@ -32,11 +30,9 @@ build/noob/cache.o: src/cache.cpp
 build/noob/game.o: src/game.cpp
 	$(CXX) $(CFLAGS_NOOB) src/game.cpp -o build/noob/game.o
 
-build/noob/perfect.o: src/perfect.cpp
-	$(CXX) $(CFLAGS_NOOB) src/perfect.cpp -o build/noob/perfect.o
 
-bin/test_noob: setup gtest build/noob/test_noob.o build/noob/test_connect4.o build/noob/test_cache.o build/noob/game.o build/noob/connect4.o build/noob/cache.o build/noob/test_perfect.o build/noob/perfect.o
-	$(CXX) $(LDFLAGS_TEST) build/noob/test_noob.o build/noob/test_connect4.o build/noob/test_cache.o build/noob/connect4.o build/noob/cache.o build/noob/game.o build/noob/test_perfect.o build/noob/perfect.o -o bin/test_noob
+bin/test_noob: setup gtest build/noob/test_noob.o build/noob/test_connect4.o build/noob/test_cache.o build/noob/test_game.o build/noob/game.o build/noob/connect4.o build/noob/cache.o
+	$(CXX) $(LDFLAGS_TEST) build/noob/test_noob.o build/noob/test_connect4.o build/noob/test_cache.o build/noob/test_game.o build/noob/connect4.o build/noob/cache.o build/noob/game.o -o bin/test_noob
 
 build/noob/test_noob.o: test/test_noob.cpp
 	$(CXX) $(CFLAGS_TEST) test/test_noob.cpp -o build/noob/test_noob.o
@@ -47,11 +43,12 @@ build/noob/test_connect4.o: test/test_connect4.cpp
 build/noob/test_cache.o: test/test_cache.cpp
 	$(CXX) $(CFLAGS_TEST) test/test_cache.cpp -o build/noob/test_cache.o
 
-build/noob/test_perfect.o: test/test_perfect.cpp
-	$(CXX) $(CFLAGS_TEST) test/test_perfect.cpp -o build/noob/test_perfect.o
+build/noob/test_game.o: test/test_game.cpp
+	$(CXX) $(CFLAGS_TEST) test/test_game.cpp -o build/noob/test_game.o
 
-bin/bench_noob: setup build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/perfect.o build/noob/game.o
-	$(CXX) $(LDFLAGS) build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/perfect.o build/noob/game.o -o bin/bench_noob
+
+bin/bench_noob: setup build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/game.o
+	$(CXX) $(LDFLAGS) build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/game.o -o bin/bench_noob
 
 build/noob/bench_noob.o: benchmark/bench_noob.cpp
 	$(CXX) $(CFLAGS) benchmark/bench_noob.cpp -o build/noob/bench_noob.o
