@@ -56,18 +56,8 @@ Value Game::alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDep
 
         NodeOrdering ordering;
         for(unsigned i=0; i<WIDTH; i++) {
-            Connect4& child = children[i];
-            if(child.isValid()) {
-                ordering.increment(i, child.heuristic());
-            }
-        }
-        if(cacheValue.move != MOVE_INVALID) {
-            ordering.increment(cacheValue.move, VALUE_MAX);
-        }
-
-        for(unsigned i=0; i<WIDTH; i++) {
-            int move = i;
-            Connect4& child = children[i];
+            int move = ordering.move(i);
+            Connect4& child = children[move];
 
             if(!child.isValid()) continue;
 
