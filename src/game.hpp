@@ -30,10 +30,19 @@ class Game {
     }
 
     Value alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDepth);
+
+    void printStats(double duration) {
+        std::cout << duration << "\t seconds" << std::endl;
+        std::cout << stats->nodesExplored / duration << "\t nodes per seconds" << std::endl;
+        std::cout << *stats << std::endl;
+    }
+
     void reset() {
         cache->resetBounds();
         bufferStart = buffer;
     }
+
+
 
   private:
     Cache* cache;
@@ -46,41 +55,45 @@ class Game {
 
 };
 
-
 class NodeOrdering {
 
   public:
-    NodeOrdering() {
+    NodeOrdering(Connect4* nodes, Player player) {
         for(unsigned i=0; i<WIDTH; i++) {
             ordering[i].index = i;
-            ordering[i].score = 0;
+            ordering[i].score = nodes[i].isValid() ? nodes[i].heuristic() : VALUE_MIN;
         }
-    }
 
-    void increment(int index, int increment) {
-        for(unsigned i=0; i<WIDTH; i++) {
-            if(ordering[i].index == index) {
-                ordering[i].score += increment;
-
-                // BUBBLE SORT IS THE BEST SORT
-                for(;i > 0 && ordering[i].score > ordering[i-1].score; i--) {
-                    std::swap(ordering[i], ordering[i-1]);
-                }
-
-                break;
-            }
+        if(player == PLAYER_MAX) {
+            std::sort(ordering, ordering+WIDTH, compareMax);
+        } else if(player == PLAYER_MIN) {
+            std::sort(ordering, ordering+WIDTH, compareMin);
+        } else {
+            assert(false);
         }
+
     }
 
     int move(int i) const {
         return ordering[i].index;
     }
 
+    friend std::ostream& operator<< (std::ostream& o, NodeOrdering const& fred);
+
   private:
     struct NodeScore {
-        int index;
-        uint64 score;
+        uint index;
+        uint score;
     };
+
+    static bool compareMax(NodeScore n1, NodeScore n2) {
+        return (n1.score > n2.score);
+    }
+
+    static bool compareMin(NodeScore n1, NodeScore n2) {
+        return (n1.score < n2.score);
+    }
+
     NodeScore ordering[WIDTH];
 };
 

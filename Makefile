@@ -1,6 +1,6 @@
 GTEST=gtest-1.7.0
 
-CFLAGS=-c -g -Wall -Isrc -Itest -pthread
+CFLAGS=-c -O3 -Wall -Isrc -Itest -pthread
 CFLAGS_NOOB=$(CFLAGS) -Weffc++ -pedantic -Wextra
 CFLAGS_TEST=$(CFLAGS) -Isrc -Ibuild/$(GTEST)/include
 

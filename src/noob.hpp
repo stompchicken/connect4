@@ -2,19 +2,18 @@
 #define NOOB
 
 #include <stdint.h>
-
-
-#define PLAYER_INVALID 0
-#define PLAYER_MAX 1
-#define PLAYER_MIN 2
-
-#include <iostream>
-
-int flipPlayer(int player);
+#include <cassert>
 
 typedef uint64_t uint64;
 typedef uint32_t uint32;
 typedef uint8_t uint8;
+
+
+typedef int Player;
+const static Player PLAYER_INVALID = 0;
+const static Player PLAYER_MAX = 1;
+const static Player PLAYER_MIN = 2;
+Player flipPlayer(Player player);
 
 typedef int Value;
 const static Value VALUE_UNKNOWN = 0;

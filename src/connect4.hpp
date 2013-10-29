@@ -28,6 +28,34 @@ O = P2
 
 */
 
+class Bitboard {
+  public:
+    inline static unsigned toIndex(unsigned row, unsigned col) {
+        return (col * (HEIGHT+1)) + row;
+    }
+
+    inline static unsigned toRow(unsigned index) {
+        return index % (HEIGHT+1);
+    }
+
+    inline static unsigned toCol(unsigned index) {
+        return index / (HEIGHT+1);
+    }
+
+    inline static uint64 toMask(unsigned row, unsigned col) {
+        return (uint64)1 << toIndex(row, col);
+    }
+
+    static uint64 parse(std::string board, char piece = 'X');
+
+    static uint64 line4(uint64);
+    static uint64 line3(uint64, uint64);
+    static uint64 line2(uint64, uint64);
+
+    static uint64 zeroBarrier;
+
+};
+
 class Connect4 {
 
   public:
@@ -48,7 +76,8 @@ class Connect4 {
     static Connect4 random(Depth depth=16);
 
     inline uint64 hash() const { return xorHash; }
-    inline uint64 key() const { return static_cast<uint32_t>(xorHash);
+    inline uint64 key() const {
+        return static_cast<uint32_t>(xorHash);
 /*
         uint64 base = 0;
         for(unsigned col=0; col<WIDTH; col++) {
@@ -59,39 +88,31 @@ class Connect4 {
     }
 
     inline int getPlayer() const { return player; }
-    inline void setPlayer(int p) { this->player = p; }
+    inline void setPlayer(Player p) { this->player = p; }
+    inline bool isValid() { return player != PLAYER_INVALID; }
 
     inline int getDepth() const { return depth; }
-    inline void setDepth(int d) { this->depth = d; }
+    inline void setDepth(Depth d) { this->depth = d; }
 
     void children(Connect4* buffer) const;
     Value evaluate() const;
     Value heuristic() const;
 
-    // Flip X's to O's
-    void flipBoard();
-
     std::string print() const;
     void parse(std::string text, int player, int depth);
 
-    bool isValid() { return player != PLAYER_INVALID; }
-
     void assertInvariants() const;
+
 
   private:
     uint64 p1, p2;
 
-    int player;
+    Player player;
     int depth;
 
     // Derived fields
     uint8_t emptyPos[WIDTH];
     uint64 xorHash;
-
-    static uint64 zeroBarrier;
-
-    uint64 line4(uint64) const;
-    uint64 hotspot3(uint64, uint64) const;
 
     void generateDerivedFields();
     void makeMove(unsigned row, unsigned col);
@@ -131,7 +152,6 @@ class Connect4 {
     };
 
     static Hasher hasher;
-
 };
 
 #endif

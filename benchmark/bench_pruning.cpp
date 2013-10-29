@@ -8,24 +8,22 @@
 
 
 void benchmark_pruning() {
-    std::vector<Connect4> boards;
-    boards.push_back(Connect4(22059759435905, 44152263917570, 1, 16));
-    boards.push_back(Connect4(34632384535, 13263398076424, 1, 16));
-    boards.push_back(Connect4(22093311852802, 43980735676549, 1, 16));
-    boards.push_back(Connect4(71674364290, 4437779169793, 1, 16));
-    boards.push_back(Connect4(4432945234562, 26388551730433, 1, 16));
-    boards.push_back(Connect4(61572651206145, 4398854111616, 1, 16));
-    boards.push_back(Connect4(206171029511, 13228501467272, 1, 16));
-    boards.push_back(Connect4(4433484202625, 8865619936512, 1, 16));
-    boards.push_back(Connect4(8796902539905, 57277685989632, 1, 16));
-    boards.push_back(Connect4(8830729699329, 21990238847874, 1, 16));
+    srand(8086);
 
-    for(size_t i=0; i<boards.size(); i++) {
+    std::clock_t bench_start = std::clock();
+    for(size_t i=0; i<1000; i++) {
         Game game(24);
+        Connect4 board = Connect4::random(12);
+        std::cout << i << std::endl;
+        std::cout << board.print() << std::endl;
         std::clock_t start = std::clock();
-        game.alphaBeta(boards[i], VALUE_MIN, VALUE_MAX, 42);
+        Value value = game.alphaBeta(board, VALUE_MIN, VALUE_MAX, 42);
         std::clock_t end = std::clock();
-        std::cout << (end - start) / (double) CLOCKS_PER_SEC << ",";
+        double duration = (end - start) / (double) CLOCKS_PER_SEC;
+        std::cout << value << ", " << board.heuristic() << std::endl;
+//        std::cout << duration << "/";
+//        std::cout << (end - bench_start) / (double) CLOCKS_PER_SEC << std::endl;
     }
     std::cout << std::endl;
 }
+

@@ -19,11 +19,15 @@ int main(int argc, char* argv[]) {
 
     srand(seed);
 
-    Game game(24);
+    Game game(28);
     Connect4 board = Connect4::random(depth);
+//    Connect4 board = Connect4(21990500991617, 8796095139072, 1, 12);
     std::cout << board.print() << std::endl;
+    std::clock_t start = std::clock();
     Value value = game.alphaBeta(board, VALUE_MIN, VALUE_MAX, maxDepth);
+    std::clock_t end = std::clock();
     std::cout << "Value: " << value << std::endl;
+    game.printStats((end - start) / (double) CLOCKS_PER_SEC);
 
     return 0;
 }

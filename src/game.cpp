@@ -14,7 +14,7 @@ Value flipValue(Value value) {
 }
 
 Value Game::alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDepth) {
-//    std::cout << board.getDepth() << std::endl;
+//    std::cout << board.getDepth() << " " << board.getPlayer() << std::endl;
 //    std::cout << board.print() << std::endl << std::endl;
 
     stats->nodesExplored++;
@@ -24,6 +24,7 @@ Value Game::alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDep
     // Look up state in cache
     CacheValue cacheValue;
     if(cache->get(board, cacheValue)) {
+        stats->cacheHits++;
         if(cacheValue.lower >= beta) {
             return cacheValue.lower;
         } else if(alpha >= cacheValue.upper) {
@@ -32,6 +33,7 @@ Value Game::alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDep
         alpha = std::max(alpha, cacheValue.lower);
         beta = std::min(beta, cacheValue.upper);
     } else {
+        stats->cacheMisses++;
         cacheValue.lower = VALUE_MIN;
         cacheValue.upper = VALUE_MAX;
         cacheValue.move = MOVE_INVALID;
@@ -54,7 +56,8 @@ Value Game::alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDep
         int bestMove = 0;
         value = (player == PLAYER_MAX) ? VALUE_MIN : VALUE_MAX;
 
-        NodeOrdering ordering;
+        NodeOrdering ordering(children, player);
+//        std::cout << ordering << std::endl;
         for(unsigned i=0; i<WIDTH; i++) {
             int move = ordering.move(i);
             Connect4& child = children[move];
@@ -107,6 +110,16 @@ std::ostream& operator<<(std::ostream& os, const Stats& stats) {
     os << stats.nodesExplored << "\t nodes explored" << std::endl;
     os << stats.cutoffs << "\t nodes cut off" << std::endl;
     os << stats.terminalNodes << "\t terminal nodes" << std::endl;
-    os << stats.cacheHits << "\t cache hits";
+    os << stats.cacheHits << "\t cache hits" << std::endl;
+    os << stats.cacheMisses << "\t cache misses" << std::endl;
+    os << static_cast<float>(stats.cacheHits)/(stats.cacheHits+stats.cacheMisses) << "\t cache hit rate" << std::endl;
+    return os;
+}
+
+std::ostream& operator<<(std::ostream& os, NodeOrdering const& o) {
+    os << "NodeOrdering: {";
+    for(unsigned i=0; i<WIDTH; i++) {
+        os << "(" << o.ordering[i].index << ", " << o.ordering[i].score << ") ";
+    }
     return os;
 }
