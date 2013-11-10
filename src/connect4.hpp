@@ -47,13 +47,18 @@ class Bitboard {
     }
 
     static uint64 parse(std::string board, char piece = 'X');
+    static std::string print(uint64 board, char piece = 'X');
 
     static uint64 line4(uint64);
-    static uint64 line3(uint64, uint64);
-    static uint64 line2(uint64, uint64);
+    static uint64 line3(uint64);
+
+    inline static unsigned popcount(uint64 x) {
+        int c = 0;
+        for (; x > 0; x &= x -1) c++;
+        return c;
+    }
 
     static uint64 zeroBarrier;
-
 };
 
 class Connect4 {

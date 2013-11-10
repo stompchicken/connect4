@@ -1,10 +1,10 @@
 GTEST=gtest-1.7.0
 
-CFLAGS=-c -O3 -Wall -Isrc -Itest -pthread
+CFLAGS=-c -g -Wall -Isrc -Itest
 CFLAGS_NOOB=$(CFLAGS) -Weffc++ -pedantic -Wextra
 CFLAGS_TEST=$(CFLAGS) -Isrc -Ibuild/$(GTEST)/include
 
-LDFLAGS=-pthread
+LDFLAGS=
 LDFLAGS_TEST=$(LDFLAGS) -Lbuild/$(GTEST)/lib -lgtest
 
 .PHONY: gtest setup
@@ -47,14 +47,17 @@ build/noob/test_game.o: test/test_game.cpp
 	$(CXX) $(CFLAGS_TEST) test/test_game.cpp -o build/noob/test_game.o
 
 
-bin/bench_noob: setup build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/game.o
-	$(CXX) $(LDFLAGS) build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/connect4.o build/noob/cache.o build/noob/game.o -o bin/bench_noob
+bin/bench_noob: setup build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/bench_heuristic.o build/noob/connect4.o build/noob/cache.o build/noob/game.o
+	$(CXX) $(LDFLAGS) build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/bench_heuristic.o build/noob/connect4.o build/noob/cache.o build/noob/game.o -o bin/bench_noob
 
 build/noob/bench_noob.o: benchmark/bench_noob.cpp
 	$(CXX) $(CFLAGS) benchmark/bench_noob.cpp -o build/noob/bench_noob.o
 
 build/noob/bench_pruning.o: benchmark/bench_pruning.cpp
 	$(CXX) $(CFLAGS) benchmark/bench_pruning.cpp -o build/noob/bench_pruning.o
+
+build/noob/bench_heuristic.o: benchmark/bench_heuristic.cpp
+	$(CXX) $(CFLAGS) benchmark/bench_heuristic.cpp -o build/noob/bench_heuristic.o
 
 gtest: third-party/$(GTEST)/make/Makefile
 	mkdir -p build/$(GTEST)/lib

@@ -3,10 +3,106 @@
 
 using namespace testing;
 
+class BitboardTest : public Test { };
+
+TEST_F(BitboardTest, Line4) {
+    uint64 b = Bitboard::parse(
+        ".|.|.|.|.|.|X|\n"
+        ".|.|X|.|X|X|X|\n"
+        "X|X|X|.|.|X|X|\n"
+        ".|.|X|.|X|.|.|\n"
+        ".|X|X|X|X|.|.|\n"
+        ".|.|.|.|X|.|.|");
+
+    uint64 lines = Bitboard::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|.|.|.|X|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|X|.|.|\n"
+        ".|.|.|.|X|.|.|");
+
+    ASSERT_EQ(lines, Bitboard::line4(b));
+}
+
+TEST_F(BitboardTest, Line3) {
+    uint64 b = Bitboard::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|X|.|X|.|\n"
+        ".|X|.|.|.|X|.|\n"
+        ".|X|.|X|.|.|.|\n"
+        ".|X|.|X|.|X|.|\n"
+        ".|.|.|.|.|.|.|");
+
+    uint64 lines = Bitboard::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|X|.|.|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|.|.|.|.|X|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|X|.|.|.|.|.|");
+
+    ASSERT_EQ(lines, Bitboard::line3(b)) << Bitboard::print(Bitboard::line3(b));
+
+    b = Bitboard::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|X|X|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|X|X|.|X|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|X|.|X|X|.|.|");
+
+    lines = Bitboard::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|X|.|.|.|X|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|.|.|.|.|");
+
+    ASSERT_EQ(lines, Bitboard::line3(b)) << Bitboard::print(Bitboard::line3(b));
+
+    b = Bitboard::parse(
+        ".|.|.|X|.|.|.|\n"
+        ".|.|X|.|.|.|.|\n"
+        "X|.|.|X|.|X|.|\n"
+        ".|X|.|.|X|.|X|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|X|.|.|.|");
+
+    lines = Bitboard::parse(
+        ".|X|.|.|.|.|.|\n"
+        ".|.|.|.|X|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|.|.|X|.|\n"
+        ".|.|.|.|.|.|.|");
+
+    ASSERT_EQ(lines, Bitboard::line3(b)) << Bitboard::print(Bitboard::line3(b));
+
+    b = Bitboard::parse(
+        ".|.|.|X|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|X|.|.|X|.|X|\n"
+        "X|.|.|X|.|X|.|\n"
+        ".|.|X|.|.|.|.|\n"
+        ".|.|.|X|.|.|.|");
+
+    lines = Bitboard::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|.|.|X|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|X|.|.|\n"
+        ".|X|.|.|.|.|.|");
+
+    ASSERT_EQ(lines, Bitboard::line3(b)) << Bitboard::print(Bitboard::line3(b));
+}
+
 class Connect4Test : public Test {
   public:
     virtual void SetUp() {
-        srand(12);
+        srand(8088);
     }
 };
 

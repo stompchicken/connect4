@@ -22,8 +22,29 @@ uint64 Bitboard::parse(std::string text, char piece) {
     return board;
 }
 
+std::string Bitboard::print(uint64 b, char piece) {
+    std::string text;
+    uint64 mask;
+    for(unsigned row=0; row<HEIGHT; row++) {
+        for(unsigned col=0; col<WIDTH; col++) {
+            mask = Bitboard::toMask((HEIGHT-1)-row, col);
+
+            if(b & mask) {
+                text.append("X|");
+            } else {
+                text.append(".|");
+            }
+        }
+        if(row != HEIGHT - 1) {
+            text.append("\n");
+        }
+    }
+    return text;
+}
+
+
 uint64 Bitboard::line4(uint64 b) {
-    uint64 x;
+    uint64 x = 0;
 
     x = (b << 2) & b;
     uint64 vertical = x & (x << 1);
@@ -37,41 +58,42 @@ uint64 Bitboard::line4(uint64 b) {
     x = (b << (2*(HEIGHT))) & b;
     uint64 diagLeft = x & (x << (HEIGHT));
 
-    return vertical || horizontal || diagLeft || diagRight;
-}
-
-uint64 Bitboard::line3(uint64 b1, uint64 b2) {
-    uint64 vertical = (b1 & (b1 << 1) & (b1 << 2) & ~(b2 << 3)) |
-        (b1 & (b1 >> 1) & (b1 >> 2) & ~(b2 >> 3));
-    uint64 horizontal = (b1 & (b1 << (HEIGHT+1)) & (b1 << (2*(HEIGHT+1))) & ~(b2 << (3*(HEIGHT+1)))) |
-        (b1 & (b1 >> (HEIGHT+1)) & (b1 >> (2*(HEIGHT+1))) & ~(b2 >> (3*(HEIGHT+1))));
-    uint64 diagRight = (b1 & (b1 << (HEIGHT+2)) & (b1 << (2*(HEIGHT+2))) & ~(b2 << (3*(HEIGHT+2)))) |
-        (b1 & (b1 >> (HEIGHT+2)) & (b1 >> (2*(HEIGHT+2))) & ~(b2 >> (3*(HEIGHT+2))));
-    uint64 diagLeft = (b1 & (b1 << HEIGHT) & (b1 << (2*HEIGHT)) & ~(b2 << (3*HEIGHT))) |
-        (b1 & (b1 >> HEIGHT) & (b1 >> (2*HEIGHT)) & ~(b2 >> (3*HEIGHT)));
-    return (vertical | horizontal | diagLeft | diagRight) & Bitboard::zeroBarrier;
-
-}
-
-uint64 Bitboard::line2(uint64 b1, uint64 b2) {
-    uint64 vertical = (b1 & (b1 << 1) & ~(b2 << 2)) |
-        (b1 & (b1 >> 1) & ~(b2 >> 2));
-    uint64 horizontal = (b1 & (b1 << (HEIGHT+1)) & ~(b2 << (2*(HEIGHT+1)))) |
-        (b1 & (b1 >> (HEIGHT+1)) & ~(b2 >> (2*(HEIGHT+1))));
-    uint64 diagRight = (b1 & (b1 << (HEIGHT+2)) & ~(b2 << (2*(HEIGHT+2)))) |
-        (b1 & (b1 >> (HEIGHT+2)) & ~(b2 >> (2*(HEIGHT+2))));
-    uint64 diagLeft = (b1 & (b1 << HEIGHT) & ~(b2 << (2*HEIGHT))) |
-        (b1 & (b1 >> HEIGHT) & ~(b2 >> (2*HEIGHT)));
     return (vertical | horizontal | diagLeft | diagRight) & Bitboard::zeroBarrier;
 }
 
+uint64 Bitboard::line3(uint64 b) {
+    uint64 x = 0;
+    uint s = 0;
 
+    // Horizontal
+    s = 1;
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
 
-int popcount(uint64 x)
-{
-    int c = 0;
-    for (; x > 0; x &= x -1) c++;
-    return c;
+    // Vertical
+    s = HEIGHT+1;
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
+
+    // Left diagonal
+    s = HEIGHT;
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
+
+    // Right diagonal
+    s = HEIGHT+2;
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
+    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
+    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
+
+    return x & Bitboard::zeroBarrier;
 }
 
 uint64 makeZeroBarrier() {
@@ -85,6 +107,7 @@ uint64 makeZeroBarrier() {
 }
 
 uint64 Bitboard::zeroBarrier = makeZeroBarrier();
+
 Connect4::Hasher Connect4::hasher;
 
 Connect4::Connect4() : p1(0), p2(0), player(PLAYER_MAX), depth(0) {
@@ -187,13 +210,9 @@ Value Connect4::heuristic() const {
     if(val != VALUE_UNKNOWN) {
         return val;
     } else {
-        int p13 = popcount(Bitboard::line3(p1, p2));
-        int p23 = popcount(Bitboard::line3(p2, p1));
-
-        int p12 = popcount(Bitboard::line2(p1, p2));
-        int p22 = popcount(Bitboard::line2(p2, p1));
-
-        return (16*(p13 - p23)) + (4*(p12 - p22)) + 128;
+        int p13 = Bitboard::popcount(Bitboard::line3(p1 & ~p2));
+        int p23 = Bitboard::popcount(Bitboard::line3(p2 & ~p1));
+        return (p13 - p23) + 128;
     }
 }
 
