@@ -47,10 +47,11 @@ class Bitboard {
     }
 
     static uint64 parse(std::string board, char piece = 'X');
-    static std::string print(uint64 board, char piece = 'X');
+    static std::string print(uint64 board);
 
     static uint64 line4(uint64);
     static uint64 line3(uint64);
+    static uint64 line2(uint64);
 
     inline static unsigned popcount(uint64 x) {
         int c = 0;
@@ -105,6 +106,8 @@ class Connect4 {
 
     std::string print() const;
     void parse(std::string text, int player, int depth);
+
+    Connect4 flip() const;
 
     void assertInvariants() const;
 

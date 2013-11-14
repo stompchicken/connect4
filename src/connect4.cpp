@@ -22,7 +22,7 @@ uint64 Bitboard::parse(std::string text, char piece) {
     return board;
 }
 
-std::string Bitboard::print(uint64 b, char piece) {
+std::string Bitboard::print(uint64 b) {
     std::string text;
     uint64 mask;
     for(unsigned row=0; row<HEIGHT; row++) {
@@ -64,36 +64,71 @@ uint64 Bitboard::line4(uint64 b) {
 uint64 Bitboard::line3(uint64 b) {
     uint64 x = 0;
     uint s = 0;
-
-    // Horizontal
-    s = 1;
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
+    uint64 l1, l2, l3;
+    uint64 r1, r2, r3;
 
     // Vertical
+    s = 1;
+    l1 = b << 1;
+    l2 = b << 2;
+    l3 = b << 3;
+    r1 = b >> 1;
+    r2 = b >> 2;
+    r3 = b >> 3;
+
+    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
+         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
+
+    // Horizontal
     s = HEIGHT+1;
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
+    l1 = b << 1*s;
+    l2 = b << 2*s;
+    l3 = b << 3*s;
+    r1 = b >> 1*s;
+    r2 = b >> 2*s;
+    r3 = b >> 3*s;
+
+    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
+         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
 
     // Left diagonal
     s = HEIGHT;
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
+    l1 = b << 1*s;
+    l2 = b << 2*s;
+    l3 = b << 3*s;
+    r1 = b >> 1*s;
+    r2 = b >> 2*s;
+    r3 = b >> 3*s;
+
+    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
+         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
 
     // Right diagonal
     s = HEIGHT+2;
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b << (3*s)));
-    x |= (~b & (b << (1*s)) & (b << (2*s)) & (b >> (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b << (1*s)));
-    x |= (~b & (b >> (1*s)) & (b >> (2*s)) & (b >> (3*s)));
+    l1 = b << 1*s;
+    l2 = b << 2*s;
+    l3 = b << 3*s;
+    r1 = b >> 1*s;
+    r2 = b >> 2*s;
+    r3 = b >> 3*s;
+
+    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
+         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
 
     return x & Bitboard::zeroBarrier;
+}
+
+uint64 Bitboard::line2(uint64 b) {
+    uint64 x = 0;
+    uint s = 1;
+    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
+    s = HEIGHT;
+    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
+    s = HEIGHT+1;
+    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
+    s = HEIGHT+2;
+    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
+    return x;
 }
 
 uint64 makeZeroBarrier() {
@@ -297,4 +332,20 @@ void Connect4::makeMove(unsigned row, unsigned col) {
     this->depth += 1;
     this->emptyPos[col] += 1;
 
+}
+
+uint64 reverseBits(uint64 x) {
+    uint64 output = 0;
+    for(unsigned row=0; row<HEIGHT; row++) {
+        for(unsigned col=0; col<WIDTH; col++) {
+            if (x & Bitboard::toMask(row, col)) {
+                output |= Bitboard::toMask(row, WIDTH-1-col);
+            }
+        }
+    }
+    return output;
+}
+
+Connect4 Connect4::flip() const {
+    return Connect4(reverseBits(p1), reverseBits(p2), flipPlayer(player), depth);
 }

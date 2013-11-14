@@ -305,3 +305,30 @@ TEST_F(Connect4Test, Children) {
         }
     }
 }
+
+TEST_F(Connect4Test, Flip) {
+
+    Connect4 board;
+    board.parse(
+      ".|.|.|.|.|.|.|\n"
+      ".|.|.|.|.|.|.|\n"
+      ".|.|.|.|.|.|.|\n"
+      ".|.|.|O|.|.|.|\n"
+      ".|X|.|X|.|.|O|\n"
+      "X|X|.|O|.|.|O|",
+      PLAYER_MAX, 1);
+
+    Connect4 flip;
+    flip.parse(
+      ".|.|.|.|.|.|.|\n"
+      ".|.|.|.|.|.|.|\n"
+      ".|.|.|.|.|.|.|\n"
+      ".|.|.|O|.|.|.|\n"
+      "O|.|.|X|.|X|.|\n"
+      "O|.|.|O|.|X|X|",
+      PLAYER_MIN, 1);
+
+
+    ASSERT_EQ(flip, board.flip()) << board.flip().print();
+
+}

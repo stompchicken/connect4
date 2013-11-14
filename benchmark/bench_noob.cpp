@@ -5,6 +5,6 @@
 
 int main(int argc, char* argv[]) {
     benchmark_pruning();
-    benchmark_heuristic();
+//    benchmark_heuristic();
     return 0;
 }
