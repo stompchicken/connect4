@@ -19,7 +19,7 @@ int main(int argc, char* argv[]) {
 
     srand(seed);
 
-    Game game(28);
+    Game game(29);
     Connect4 board = Connect4::random(depth);
 //    Connect4 board = Connect4(21990500991617, 8796095139072, 1, 12);
     std::cout << board.print() << std::endl;

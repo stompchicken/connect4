@@ -6,8 +6,8 @@
 
 #include "noob.hpp"
 
-const static unsigned WIDTH = 7;
-const static unsigned HEIGHT = 6;
+const static unsigned WIDTH = 6;
+const static unsigned HEIGHT = 5;
 const static unsigned SIZE = (HEIGHT+1) * WIDTH;
 
 /*

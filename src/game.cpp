@@ -32,7 +32,7 @@ Value Game::alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDep
         }
         alpha = std::max(alpha, cacheValue.lower);
         beta = std::min(beta, cacheValue.upper);
-    } else if(depth < 8 && cache->get(board.flip(), cacheValue)) {
+    } else if(depth <= 8 && cache->get(board.flip(), cacheValue)) {
         stats->cacheHits++;
         if(cacheValue.lower >= beta) {
             return cacheValue.lower;

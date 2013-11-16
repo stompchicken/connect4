@@ -31,17 +31,17 @@ Value minimax(const Connect4& board, int maxDepth) {
 }
 
 TEST_F(GameTest, AlphaBeta) {
-    Game game(16);
-    for(int i=0; i<10; i++) {
-        int startDepth = 16;
-        int maxDepth = startDepth + 4;
+    for(int i=0; i<1000; i++) {
+        Game game(20);
+        int startDepth = (rand() % 8) + 8;
+        int maxDepth = startDepth + 8;
 
         Connect4 board = Connect4::random(startDepth);
 
         Value minimaxValue = minimax(board, maxDepth);
         Value alphaBetaValue = game.alphaBeta(board, VALUE_MIN, VALUE_MAX, maxDepth);
 
-        ASSERT_EQ(minimaxValue, alphaBetaValue);
+        ASSERT_EQ(minimaxValue, alphaBetaValue) << board.print() << std::endl << startDepth << " -> " << maxDepth;
         game.reset();
     }
 }

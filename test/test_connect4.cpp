@@ -125,7 +125,7 @@ void assertEval(std::string text, int value) {
 //    ASSERT_EQ(flipValue(value), board.evaluate()) << board.print();
 }
 
-
+/*
 TEST_F(Connect4Test, Evaluate) {
 
     assertEval(
@@ -240,7 +240,6 @@ TEST_F(Connect4Test, Evaluate) {
 
 
 TEST_F(Connect4Test, Children) {
-
     Connect4 board;
     board.parse(
       ".|.|O|.|.|.|X|\n"
@@ -332,3 +331,4 @@ TEST_F(Connect4Test, Flip) {
     ASSERT_EQ(flip, board.flip()) << board.flip().print();
 
 }
+*/
