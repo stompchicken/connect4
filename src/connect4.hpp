@@ -6,8 +6,8 @@
 
 #include "noob.hpp"
 
-const static unsigned WIDTH = 6;
-const static unsigned HEIGHT = 5;
+const static unsigned WIDTH = 7;
+const static unsigned HEIGHT = 6;
 const static unsigned SIZE = (HEIGHT+1) * WIDTH;
 
 /*
@@ -95,7 +95,7 @@ class Connect4 {
 
     inline int getPlayer() const { return player; }
     inline void setPlayer(Player p) { this->player = p; }
-    inline bool isValid() { return player != PLAYER_INVALID; }
+    inline bool isValid() const { return player != PLAYER_INVALID; }
 
     inline int getDepth() const { return depth; }
     inline void setDepth(Depth d) { this->depth = d; }

@@ -32,15 +32,6 @@ Value Game::alphaBeta(const Connect4& board, Value alpha, Value beta, int maxDep
         }
         alpha = std::max(alpha, cacheValue.lower);
         beta = std::min(beta, cacheValue.upper);
-    } else if(depth <= 8 && cache->get(board.flip(), cacheValue)) {
-        stats->cacheHits++;
-        if(cacheValue.lower >= beta) {
-            return cacheValue.lower;
-        } else if(alpha >= cacheValue.upper) {
-            return cacheValue.upper;
-        }
-        alpha = std::max(alpha, cacheValue.lower);
-        beta = std::min(beta, cacheValue.upper);
     } else {
         stats->cacheMisses++;
         cacheValue.lower = VALUE_MIN;
@@ -128,7 +119,8 @@ std::ostream& operator<<(std::ostream& os, const Stats& stats) {
 std::ostream& operator<<(std::ostream& os, NodeOrdering const& o) {
     os << "NodeOrdering: {";
     for(unsigned i=0; i<WIDTH; i++) {
-        os << "(" << o.ordering[i].index << ", " << o.ordering[i].score << ") ";
+        os << "(" << static_cast<int>(o.indexes[i]);
+        os << ", " << static_cast<int>(o.values[i]) << ") ";
     }
     return os;
 }

@@ -7,6 +7,7 @@
 #include "connect4.hpp"
 
 // Size of the linear probing before returning failure
+// The size of a cache line in most Intel chips is 64 bytes
 const static uint64_t probe = 8;
 
 typedef uint32_t Key;

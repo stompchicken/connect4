@@ -58,43 +58,37 @@ class Game {
 class NodeOrdering {
 
   public:
-    NodeOrdering(Connect4* nodes, Player player) {
+    NodeOrdering(const Connect4* nodes, Player player) {
         for(unsigned i=0; i<WIDTH; i++) {
-            ordering[i].index = i;
-            ordering[i].score = nodes[i].isValid() ? nodes[i].heuristic() : VALUE_MIN;
+            indexes[i] = i;
+            values[i] = nodes[i].isValid() ? nodes[i].heuristic() : VALUE_MIN;
         }
 
-        if(player == PLAYER_MAX) {
-            std::sort(ordering, ordering+WIDTH, compareMax);
-        } else if(player == PLAYER_MIN) {
-            std::sort(ordering, ordering+WIDTH, compareMin);
-        } else {
-            assert(false);
-        }
+        for(uint8 i=1; i<WIDTH; i++) {
 
+            uint8 tmpIdx = indexes[i];
+            uint8 tmpVal = values[i];
+
+            uint8 j = i;
+            while(j > 0 && (player == PLAYER_MAX) ? tmpVal > values[j-1] : tmpVal < values[j-1]) {
+                values[j] = values[j-1];
+                indexes[j] = indexes[j-1];
+                j--;
+            }
+            indexes[j] = tmpIdx;
+            values[j] = tmpVal;
+        }
     }
 
-    int move(int i) const {
-        return ordering[i].index;
+    uint move(uint i) const {
+        return indexes[i];
     }
 
     friend std::ostream& operator<< (std::ostream& o, NodeOrdering const& fred);
 
   private:
-    struct NodeScore {
-        uint index;
-        uint score;
-    };
-
-    static bool compareMax(NodeScore n1, NodeScore n2) {
-        return (n1.score > n2.score);
-    }
-
-    static bool compareMin(NodeScore n1, NodeScore n2) {
-        return (n1.score < n2.score);
-    }
-
-    NodeScore ordering[WIDTH];
+    uint8 indexes[WIDTH];
+    uint8 values[WIDTH];
 };
 
 
