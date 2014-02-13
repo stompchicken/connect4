@@ -2,9 +2,8 @@
 #define CACHE
 
 #include <stdint.h>
-#include <map>
 
-#include "connect4.hpp"
+#include "gameState.hpp"
 
 // Size of the linear probing before returning failure
 // The size of a cache line in most Intel chips is 64 bytes
@@ -13,9 +12,9 @@ const static uint64_t probe = 8;
 typedef uint32_t Key;
 
 struct CacheValue {
-    Value lower, upper;
-    uint8_t move;
+    Value value;
     uint8_t depth;
+    uint16_t padding;
 };
 
 bool operator==(const CacheValue& lhs, const CacheValue& rhs);
@@ -29,9 +28,8 @@ class Cache {
   public:
     Cache(int bits);
     virtual ~Cache();
-    bool get(const Connect4& board, CacheValue& value) const;
-    bool put(const Connect4& board, const CacheValue& value);
-    void resetBounds();
+    bool get(const GameState& state, CacheValue& value) const;
+    bool put(const GameState& state, const CacheValue& value);
     std::string statistics() const;
 
   private:
@@ -50,7 +48,6 @@ class Cache {
     Cache(const Cache& other);
     Cache& operator=(const Cache& other);
 };
-
 
 uint64_t toEntry(Key key, CacheValue value);
 Key toKey(uint64_t entry);

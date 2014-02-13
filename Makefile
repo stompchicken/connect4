@@ -1,83 +1,36 @@
-GTEST=gtest-1.7.0
+INCLUDES=-Isrc -Itest
+CFLAGS=-O1 -Wall -Weffc++ -pedantic -Wextra
+LDFLAGS=-lpthread
 
-CFLAGS=-c -O3 -Wall -Isrc -Itest
-CFLAGS_NOOB=$(CFLAGS) -Weffc++ -pedantic -Wextra
-CFLAGS_TEST=$(CFLAGS) -Isrc -Ibuild/$(GTEST)/include
+SRC=$(wildcard src/*.cpp)
+OBJ=$(patsubst src/%.cpp,build/%.o,$(SRC))
 
-LDFLAGS=
-LDFLAGS_TEST=$(LDFLAGS) -Lbuild/$(GTEST)/lib -lgtest
+TEST_SRC=$(wildcard test/*.cpp)
+TEST_OBJ=$(patsubst test/%.cpp,build/%.o,$(TEST_SRC))
+TEST_OBJ+=$(OBJ)
+TEST_OBJ:=$(filter-out build/main.o, $(TEST_OBJ))
 
-.PHONY: gtest setup
+.PHONY: setup
 
-all: bin/noob bin/test_noob bin/slowtest_noob bin/bench_noob
+all: bin/connect4 bin/test
 
 setup:
-	mkdir -p build/noob
-	mkdir -p bin
+	@mkdir -p build
+	@mkdir -p bin
 
-bin/noob: setup build/noob/noob.o build/noob/connect4.o build/noob/cache.o build/noob/game.o
-	$(CXX) $(LDFLAGS) build/noob/noob.o build/noob/connect4.o build/noob/game.o build/noob/cache.o -o bin/noob
+bin/connect4: setup $(OBJ)
+	$(CXX) $(LDFLAGS) $(OBJ) -o bin/connect4
 
-build/noob/noob.o: src/noob.cpp
-	$(CXX) $(CFLAGS_NOOB) src/noob.cpp -o build/noob/noob.o
+bin/test: setup $(OBJ) $(TEST_OBJ)
+	$(CXX) $(LDFLAGS) $(TEST_OBJ) -o bin/test
 
-build/noob/connect4.o: src/connect4.cpp
-	$(CXX) $(CFLAGS_NOOB) src/connect4.cpp -o build/noob/connect4.o
+build/%.o: src/%.cpp
+	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
 
-build/noob/cache.o: src/cache.cpp
-	$(CXX) $(CFLAGS_NOOB) src/cache.cpp -o build/noob/cache.o
-
-build/noob/game.o: src/game.cpp
-	$(CXX) $(CFLAGS_NOOB) src/game.cpp -o build/noob/game.o
-
-# Unit tests
-
-bin/test_noob: setup gtest build/noob/test_noob.o build/noob/test_connect4.o build/noob/test_cache.o build/noob/game.o build/noob/connect4.o build/noob/cache.o
-	$(CXX) $(LDFLAGS_TEST) build/noob/test_noob.o build/noob/test_connect4.o build/noob/test_cache.o build/noob/connect4.o build/noob/cache.o build/noob/game.o -o bin/test_noob
-
-build/noob/test_noob.o: test/test_noob.cpp
-	$(CXX) $(CFLAGS_TEST) test/test_noob.cpp -o build/noob/test_noob.o
-
-build/noob/test_connect4.o: test/test_connect4.cpp
-	$(CXX) $(CFLAGS_TEST) test/test_connect4.cpp -o build/noob/test_connect4.o
-
-build/noob/test_cache.o: test/test_cache.cpp
-	$(CXX) $(CFLAGS_TEST) test/test_cache.cpp -o build/noob/test_cache.o
-
-# Slow tests
-
-bin/slowtest_noob: setup gtest build/noob/slowtest_noob.o build/noob/slowtest_game.o build/noob/connect4.o build/noob/cache.o build/noob/game.o
-	$(CXX) $(LDFLAGS_TEST) build/noob/slowtest_noob.o build/noob/slowtest_game.o build/noob/connect4.o build/noob/cache.o build/noob/game.o -o bin/slowtest_noob
-
-build/noob/slowtest_noob.o: slowtest/slowtest_noob.cpp
-	$(CXX) $(CFLAGS_TEST) slowtest/slowtest_noob.cpp -o build/noob/slowtest_noob.o
-
-build/noob/slowtest_game.o: slowtest/slowtest_game.cpp
-	$(CXX) $(CFLAGS_TEST) slowtest/slowtest_game.cpp -o build/noob/slowtest_game.o
-
-# Benchmarks
-
-bin/bench_noob: setup build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/bench_heuristic.o build/noob/connect4.o build/noob/cache.o build/noob/game.o
-	$(CXX) $(LDFLAGS) build/noob/bench_noob.o build/noob/bench_pruning.o build/noob/bench_heuristic.o build/noob/connect4.o build/noob/cache.o build/noob/game.o -o bin/bench_noob
-
-build/noob/bench_noob.o: benchmark/bench_noob.cpp
-	$(CXX) $(CFLAGS) benchmark/bench_noob.cpp -o build/noob/bench_noob.o
-
-build/noob/bench_pruning.o: benchmark/bench_pruning.cpp
-	$(CXX) $(CFLAGS) benchmark/bench_pruning.cpp -o build/noob/bench_pruning.o
-
-build/noob/bench_heuristic.o: benchmark/bench_heuristic.cpp
-	$(CXX) $(CFLAGS) benchmark/bench_heuristic.cpp -o build/noob/bench_heuristic.o
-
-gtest: third-party/$(GTEST)/make/Makefile
-	mkdir -p build/$(GTEST)/lib
-	mkdir -p build/$(GTEST)/include
-	make -C third-party/$(GTEST)/make
-	cp third-party/$(GTEST)/make/gtest_main.a build/$(GTEST)/lib/libgtest.a
-	cp -rf third-party/$(GTEST)/include/gtest build/$(GTEST)/include
+build/%.o: test/%.cpp
+	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
 
 clean:
 	rm -rf bin/*
 	rm -rf build/*
-	make -C third-party/$(GTEST)/make clean
 

@@ -3,21 +3,19 @@
 #include <sstream>
 
 bool operator==(const CacheValue& lhs, const CacheValue& rhs) {
-    return lhs.lower == rhs.lower && lhs.upper == rhs.upper && lhs.move == rhs.move && lhs.depth == rhs.depth;
+    return lhs.value == rhs.value && lhs.depth == rhs.depth;
 }
 
 std::ostream& operator<<(std::ostream &output, const CacheValue &val) {
-    output << "{" << val.lower << ", " << val.upper << ", ";
-    output << static_cast<int>(val.move) << ", " << static_cast<int>(val.depth) << "}";
+    output << "{" << val.value << ", " << static_cast<int>(val.depth) << "}";
     return output;
 }
 
 uint64_t toEntry(Key key, CacheValue value) {
-    uint64_t entry = static_cast<uint64_t>(key) << 32;
-    entry |= static_cast<uint64_t>(value.lower) << 24;
-    entry |= static_cast<uint64_t>(value.upper) << 16;
-    entry |= static_cast<uint64_t>(value.move) << 8;
-    entry |= static_cast<uint64_t>(value.depth);
+    uint64_t entry = static_cast<uint64_t>(0);
+    entry |= static_cast<uint64_t>(key) << 32;
+    entry |= static_cast<uint64_t>(value.value) << 24;
+    entry |= static_cast<uint64_t>(value.depth) << 16;
     return entry;
 }
 
@@ -27,10 +25,9 @@ Key toKey(uint64_t entry) {
 
 CacheValue toValue(uint64_t entry) {
     CacheValue value;
-    value.lower = static_cast<uint8_t>(entry >> 24);
-    value.upper = static_cast<uint8_t>(entry >> 16);
-    value.move = static_cast<uint8_t>(entry >> 8);
-    value.depth = static_cast<uint8_t>(entry);
+    value.value = static_cast<uint8_t>(entry >> 24);
+    value.depth = static_cast<uint8_t>(entry >> 16);
+    value.padding = 0;
     return value;
 }
 
@@ -50,8 +47,8 @@ Cache::~Cache() {
     delete [] this->hashtable;
 }
 
-bool Cache::get(const Connect4& board, CacheValue& value) const {
-    uint64_t startIndex = board.hash() & this->mask;
+bool Cache::get(const GameState& state, CacheValue& value) const {
+    uint64_t startIndex = state.hash() & this->mask;
     uint64_t index;
     uint64_t entry;
 
@@ -67,7 +64,7 @@ bool Cache::get(const Connect4& board, CacheValue& value) const {
         if(k == 0) {
 //            std::cout << "GET index=" << index << " key=" << k << " FAIL" << std::endl;
             return false;
-        } else if(k == board.key()) {
+        } else if(k == state.key()) {
 //            std::cout << "GET index=" << index << " key=" << k << " SUCCEED" << std::endl;
             value = v;
             return true;
@@ -77,13 +74,13 @@ bool Cache::get(const Connect4& board, CacheValue& value) const {
     return false;
 }
 
-bool Cache::put(const Connect4& board, const CacheValue& value) {
+bool Cache::put(const GameState& state, const CacheValue& value) {
     int depth = (value.depth >= DEPTH_MAX) ? value.depth : DEPTH_MAX - 1;
 
-    uint64_t startIndex = board.hash() & this->mask;
+    uint64_t startIndex = state.hash() & this->mask;
     uint64_t index;
     uint64_t entry;
-    uint64_t newEntry = toEntry(board.key(), value);
+    uint64_t newEntry = toEntry(state.key(), value);
 
     for(uint64 offset = 0; offset < probe; offset++) {
         index = startIndex + offset;
@@ -102,7 +99,7 @@ bool Cache::put(const Connect4& board, const CacheValue& value) {
             this->counts[depth] += 1;
             this->size += 1;
             return true;
-        } else if(k == board.key()) {
+        } else if(k == state.key()) {
             // Update entry
 //            std::cout << "PUT: index=" << index << " key=" << k << " UPDATE" << std::endl;
             this->hashtable[index] = newEntry;
@@ -121,17 +118,6 @@ bool Cache::put(const Connect4& board, const CacheValue& value) {
     }
 
     return false;
-}
-
-void Cache::resetBounds() {
-    for(uint64 i=0; i<capacity; i++) {
-        Key key = toKey(hashtable[i]);
-        CacheValue value = toValue(hashtable[i]);
-        value.lower = VALUE_MIN;
-        value.upper = VALUE_MAX;
-//        value.move = MOVE_INVALID;
-        hashtable[i] = toEntry(key, value);
-    }
 }
 
 std::string Cache::statistics() const {
