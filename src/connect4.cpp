@@ -1,5 +1,7 @@
 #include "connect4.hpp"
 
+#include <ctime>
+
 Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta, int maxDepth) {
 
 //    stats->nodesExplored++;

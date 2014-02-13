@@ -1,5 +1,6 @@
 INCLUDES=-Isrc -Itest
-CFLAGS=-O1 -Wall -Weffc++ -pedantic -Wextra
+CFLAGS=-O1 -Wall
+CFLAGS_DEV=$(CFLAGS) -Wextra -pedantic
 LDFLAGS=-lpthread
 
 SRC=$(wildcard src/*.cpp)

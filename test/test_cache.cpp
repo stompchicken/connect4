@@ -9,7 +9,7 @@ CacheValue randomCacheValue() {
 }
 
 TEST_CASE("Cache works", "[fast]") {
-/*    const int cacheSize = 16;
+    const int cacheSize = 16;
     const int n = 1 << (cacheSize - 6);
     Cache cache(cacheSize);
     for(int i=0; i < n; i++) {
@@ -23,5 +23,4 @@ TEST_CASE("Cache works", "[fast]") {
 
         REQUIRE(val1 == val2);
     }
-*/
 }

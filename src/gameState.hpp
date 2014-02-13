@@ -29,10 +29,17 @@ const static Move MOVE_INVALID = 7;
 typedef uint8 Depth;
 const static Depth DEPTH_MAX = 50;
 
-
+/*
 const static unsigned WIDTH = 7;
 const static unsigned HEIGHT = 6;
 const static unsigned SIZE = (HEIGHT+1) * WIDTH;
+*/
+
+#define WIDTH 7
+#define HEIGHT 6
+#define SIZE 49
+
+
 
 /*
 

@@ -1,4 +1,5 @@
 #include "connect4.hpp"
+#include <ctime>
 
 int main(int argc, char* argv[]) {
 

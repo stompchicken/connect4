@@ -33,10 +33,8 @@ CacheValue toValue(uint64_t entry) {
 
 Cache::Cache(int bits) : mask((static_cast<uint64_t>(1) << bits) - 1),
                          size(0),
-                         capacity(static_cast<uint64_t>(1) << bits) {
-    // Zeroes all entries
-    this->hashtable = new uint64_t[capacity]();
-
+                         capacity(static_cast<uint64_t>(1) << bits),
+                         hashtable(new uint64_t[capacity]()) {
     for(int i=0; i<DEPTH_MAX; i++) {
         counts[i] = 0;
     }
