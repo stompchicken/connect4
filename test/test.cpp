@@ -3,12 +3,8 @@
 
 int main( int argc, char* const argv[] )
 {
-    // global setup...
-
+    srand(0);
     int result = Catch::Session().run( argc, argv );
-
-    // global clean-up...
-
     return result;
 }
 

@@ -141,7 +141,16 @@ uint64 makeZeroBarrier() {
     return z;
 }
 
+uint64 makeBaseBarrier() {
+    uint64 base = 0;
+    for(unsigned col=0; col<WIDTH; col++) {
+        base |= Bitboard::toMask(0, col);
+    }
+    return base;
+}
+
 uint64 Bitboard::zeroBarrier = makeZeroBarrier();
+uint64 Bitboard::baseBarrier = makeBaseBarrier();
 
 GameState::Hasher GameState::hasher;
 
@@ -191,6 +200,17 @@ GameState GameState::random(Depth moves) {
     } while (board.evaluate() != VALUE_UNKNOWN);
     return board;
 }
+
+GameState GameState::parse(std::string text, int player, int depth) {
+    GameState state;
+    state.p1 = Bitboard::parse(text, 'X');
+    state.p2 = Bitboard::parse(text, 'O');
+    state.player = player;
+    state.depth = depth;
+    state.generateDerivedFields();
+    return state;
+}
+
 
 bool GameState::operator==(const GameState& rhs) const {
     return p1 == rhs.p1 &&
@@ -273,15 +293,6 @@ std::string GameState::print() const {
     return text;
 }
 
-void GameState::parse(std::string text, int player_, int depth_) {
-    p1 = Bitboard::parse(text, 'X');
-    p2 = Bitboard::parse(text, 'O');
-
-    this->player = player_;
-    this->depth = depth_;
-    this->generateDerivedFields();
-}
-
 std::ostream& operator<<(std::ostream& os, const GameState& board) {
     os << "GameState: {";
     os << "p1=" << board.p1 << " ";
@@ -344,10 +355,6 @@ uint64 reverseBits(uint64 x) {
         }
     }
     return output;
-}
-
-GameState GameState::flip() const {
-    return GameState(reverseBits(p1), reverseBits(p2), flipPlayer(player), depth);
 }
 
 int flipPlayer(int player) {

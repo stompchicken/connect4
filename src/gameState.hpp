@@ -6,6 +6,10 @@
 #include <stdint.h>
 #include <cassert>
 
+#define WIDTH  6
+#define HEIGHT 5
+#define SIZE   WIDTH*(HEIGHT+1)
+
 typedef uint64_t uint64;
 typedef uint32_t uint32;
 typedef uint8_t uint8;
@@ -27,18 +31,7 @@ typedef uint8 Move;
 const static Move MOVE_INVALID = 7;
 
 typedef uint8 Depth;
-const static Depth DEPTH_MAX = 50;
-
-/*
-const static unsigned WIDTH = 7;
-const static unsigned HEIGHT = 6;
-const static unsigned SIZE = (HEIGHT+1) * WIDTH;
-*/
-
-#define WIDTH 7
-#define HEIGHT 6
-#define SIZE 49
-
+const static Depth DEPTH_MAX = 127;
 
 
 /*
@@ -90,7 +83,8 @@ class Bitboard {
         return c;
     }
 
-    static uint64 zeroBarrier;
+    static uint64 zeroBarrier; // Has a bit set for every valid piece location
+    static uint64 baseBarrier; // Has a bit set in the bottom row
 };
 
 class GameState {
@@ -102,27 +96,16 @@ class GameState {
     GameState(const GameState& other);
     GameState& operator=(const GameState& other);
 
-//    GameState(GameState&& other);
-//    GameState& operator=(GameState&& other);
-
-    friend std::ostream& operator<<(std::ostream& os, const GameState& board);
-
     bool operator==(const GameState& rhs) const;
     bool operator!=(const GameState& rhs) const;
 
+    friend std::ostream& operator<<(std::ostream& os, const GameState& board);
+
     static GameState random(Depth depth=16);
+    static GameState parse(std::string text, int player, int depth);
 
     inline uint64 hash() const { return xorHash; }
-    inline uint64 key() const {
-        return static_cast<uint32_t>(xorHash);
-/*
-        uint64 base = 0;
-        for(unsigned col=0; col<WIDTH; col++) {
-            base |= (uint64)1 << (col*(HEIGHT+1));
-        }
-        return p1 | (p1 + p2 + base);
-*/
-    }
+    inline uint64 key() const {  return p1 | ((p1 | p2) + Bitboard::baseBarrier); }
 
     inline int getPlayer() const { return player; }
     inline void setPlayer(Player p) { this->player = p; }
@@ -136,16 +119,12 @@ class GameState {
     Value heuristic() const;
 
     std::string print() const;
-    void parse(std::string text, int player, int depth);
-
-    GameState flip() const;
 
     void assertInvariants() const;
 
 
-  private:
+//  private:
     uint64 p1, p2;
-
     Player player;
     int depth;
 

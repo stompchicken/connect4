@@ -1,36 +1,22 @@
 #include "connect4.hpp"
 
-#include <ctime>
-
 Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta, int maxDepth) {
 
-//    stats->nodesExplored++;
+#ifdef LOG_STATS
+    stats->nodesExplored++;
+#endif
 
     int depth = state.getDepth();
     int player = state.getPlayer();
 
-    std::clock_t start;
-    if(depth <= 8) {
-        start = std::clock();
-    }
-
     // Look up state in cache
-    CacheValue cacheValue;
-    if(cache->get(state, cacheValue)) {
-//        stats->cacheHits++;
-
-        if(depth <= 8) {
-//            stats->printNode(depth, start, std::clock(), true);
-        }
-
-        return cacheValue.value;
-    } else {
-//        stats->cacheMisses++;
+    Entry cacheEntry;
+    if(cache->get(state, cacheEntry)) {
+        return cacheEntry.value;
     }
 
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
-//        stats->terminalNodes += 1;
         return value;
     } else if(depth >= maxDepth) {
         return state.heuristic();
@@ -45,8 +31,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta, int m
         value = (player == PLAYER_MAX) ? VALUE_MIN : VALUE_MAX;
 
         for(unsigned i=0; i<WIDTH; i++) {
-            int move = i;
-            GameState& child = children[move];
+            GameState& child = children[i];
 
             if(!child.isValid()) continue;
 
@@ -67,20 +52,15 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta, int m
             }
 
             if(a >= b) {
-//                stats->cutoffs += 1;
                 break;
             }
         }
 
-        cacheValue.value = value;
-        cacheValue.depth = depth;
-        cache->put(state, cacheValue);
+        cacheEntry.value = value;
+        cacheEntry.depth = depth;
+        cache->put(state, cacheEntry);
 
         bufferStart -= WIDTH;
-
-        if(depth <= 8) {
-//            stats->printNode(depth, start, std::clock(), false);
-        }
 
         return value;
     }

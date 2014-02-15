@@ -1,7 +1,7 @@
 INCLUDES=-Isrc -Itest
-CFLAGS=-O1 -Wall
+CFLAGS=-g -Wall
 CFLAGS_DEV=$(CFLAGS) -Wextra -pedantic
-LDFLAGS=-lpthread
+LDFLAGS=-g -lpthread
 
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp,build/%.o,$(SRC))

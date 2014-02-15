@@ -1,34 +1,30 @@
 #include "cache.hpp"
-
 #include <sstream>
 
-bool operator==(const CacheValue& lhs, const CacheValue& rhs) {
-    return lhs.value == rhs.value && lhs.depth == rhs.depth;
+bool operator==(const Entry& lhs, const Entry& rhs) {
+    return lhs.key == rhs.key && lhs.value == rhs.value && lhs.depth == rhs.depth;
 }
 
-std::ostream& operator<<(std::ostream &output, const CacheValue &val) {
-    output << "{" << val.value << ", " << static_cast<int>(val.depth) << "}";
+std::ostream& operator<<(std::ostream &output, const Entry &val) {
+    output << "{" << val.key << ", " << val.value << ", " << static_cast<int>(val.depth) << "}";
     return output;
 }
 
-uint64_t toEntry(Key key, CacheValue value) {
-    uint64_t entry = static_cast<uint64_t>(0);
-    entry |= static_cast<uint64_t>(key) << 32;
-    entry |= static_cast<uint64_t>(value.value) << 24;
-    entry |= static_cast<uint64_t>(value.depth) << 16;
-    return entry;
-}
-
-Key toKey(uint64_t entry) {
-    return static_cast<Key>(entry >> 32);
-}
-
-CacheValue toValue(uint64_t entry) {
-    CacheValue value;
-    value.value = static_cast<uint8_t>(entry >> 24);
-    value.depth = static_cast<uint8_t>(entry >> 16);
-    value.padding = 0;
+uint64_t packEntry(Entry entry) {
+    uint64_t value = static_cast<uint64_t>(0);
+    value |= static_cast<uint64_t>(entry.key) << 15;
+    value |= static_cast<uint64_t>(entry.value) << 7;
+    value |= static_cast<uint64_t>(entry.depth);
     return value;
+}
+
+Entry unpackEntry(uint64_t value) {
+    Entry entry;
+    entry.key = static_cast<uint64_t>(value >> 15);
+    entry.value = static_cast<uint8_t>(value >> 7);
+    entry.depth = static_cast<uint8_t>(value) &~ 0x80; // We need to
+                                                       // zero the 8th bit
+    return entry;
 }
 
 Cache::Cache(int bits) : mask((static_cast<uint64_t>(1) << bits) - 1),
@@ -45,73 +41,73 @@ Cache::~Cache() {
     delete [] this->hashtable;
 }
 
-bool Cache::get(const GameState& state, CacheValue& value) const {
+bool Cache::get(const GameState& state, Entry& entry) const {
     uint64_t startIndex = state.hash() & this->mask;
     uint64_t index;
-    uint64_t entry;
 
     for(uint64 offset = 0; offset < probe; offset++) {
         index = startIndex + offset;
+
+        // Loop over the hashtable if we hit the end
         while(index >= this->capacity) {
             index -= this->capacity;
         }
 
-        entry = this->hashtable[index];
-        Key k = toKey(entry);
-        CacheValue v = toValue(entry);
-        if(k == 0) {
-//            std::cout << "GET index=" << index << " key=" << k << " FAIL" << std::endl;
+        entry = unpackEntry(this->hashtable[index]);
+        if(entry.key == 0) {
+//            std::cout << "GET index=" << index << " key=" << entry.key << " FAIL" << std::endl;
             return false;
-        } else if(k == state.key()) {
-//            std::cout << "GET index=" << index << " key=" << k << " SUCCEED" << std::endl;
-            value = v;
+        } else if(entry.key == state.key()) {
+//            std::cout << "GET index=" << index << " key=" << entry.key << " SUCCEED" << std::endl;
             return true;
+        } else {
+//            std::cout << "GET index=" << index << " key=" << entry.key << " COLLISION" << std::endl;
         }
     }
 
     return false;
 }
 
-bool Cache::put(const GameState& state, const CacheValue& value) {
-    int depth = (value.depth >= DEPTH_MAX) ? value.depth : DEPTH_MAX - 1;
+bool Cache::put(const GameState& state, const Entry& entry) {
+    int depth = (entry.depth >= DEPTH_MAX) ? entry.depth : DEPTH_MAX - 1;
+    uint64_t newValue = packEntry(entry);
 
     uint64_t startIndex = state.hash() & this->mask;
     uint64_t index;
-    uint64_t entry;
-    uint64_t newEntry = toEntry(state.key(), value);
+    Entry currentEntry;
 
     for(uint64 offset = 0; offset < probe; offset++) {
         index = startIndex + offset;
+
+        // Loop over the hashtable if we hit the end
         while(index >= this->capacity) {
             index -= this->capacity;
         }
 
-        entry = this->hashtable[index];
-        Key k = toKey(entry);
-        CacheValue v = toValue(entry);
+        currentEntry = unpackEntry(this->hashtable[index]);
 
-        if(k == 0) {
+        if(currentEntry.key == 0) {
             // Insert new entry
-//            std::cout << "PUT: index=" << index << " key=" << k << " NEW" << std::endl;
-            this->hashtable[index] = newEntry;
+//            std::cout << "PUT: index=" << index << " key=" << currentEntry.key << " NEW" << std::endl;
+            this->hashtable[index] = newValue;
             this->counts[depth] += 1;
             this->size += 1;
             return true;
-        } else if(k == state.key()) {
+        } else if(currentEntry.key == state.key()) {
             // Update entry
-//            std::cout << "PUT: index=" << index << " key=" << k << " UPDATE" << std::endl;
-            this->hashtable[index] = newEntry;
+//            std::cout << "PUT: index=" << index << " key=" << currentEntry.key << " UPDATE" << std::endl;
+            this->hashtable[index] = newValue;
             this->counts[depth] += 1;
             return true;
-        } else if(v.depth > depth) {
+        } else if(currentEntry.depth > depth) {
             // Replace entry
-//            std::cout << "PUT: index=" << index << " key=" << k << " REPLACE" << std::endl;
-            this->hashtable[index] = newEntry;
-            this->counts[v.depth] -= 1;
+//            std::cout << "PUT: index=" << index << " key=" << currentEntry.key << " REPLACE" << std::endl;
+            this->hashtable[index] = newValue;
+            this->counts[currentEntry.depth] -= 1;
             this->counts[depth] += 1;
             return true;
         } else {
-//            std::cout << "PUT: index=" << index << " key=" << k << " FAIL" << std::endl;
+//            std::cout << "PUT: index=" << index << " key=" << currentEntry.key << " FAIL" << std::endl;
         }
     }
 
