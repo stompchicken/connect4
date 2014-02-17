@@ -31,6 +31,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta, int m
         value = (player == PLAYER_MAX) ? VALUE_MIN : VALUE_MAX;
 
         for(unsigned i=0; i<WIDTH; i++) {
+            unsigned move = i;
             GameState& child = children[i];
 
             if(!child.isValid()) continue;
