@@ -26,11 +26,17 @@ Value minimax(const GameState& board, int maxDepth) {
     }
 }
 
-TEST_CASE("Connect4::alphaBeta", "[slow]") {
-    for(int i=0; i<1000; i++) {
-        Connect4 game(20);
-        int startDepth = (rand() % 8) + 8;
-        int maxDepth = startDepth + 8;
+TEST_CASE("Connect4::alphaBeta", "[slow][hide]") {
+    for(int i=0; i<10000; i++) {
+        Connect4 game(16);
+
+#if WIDTH == 6 && HEIGHT == 5
+        int startDepth = 18;
+        int maxDepth = 30;
+#elif WIDTH == 7 && HEIGHT == 6
+        int startDepth = 32;
+        int maxDepth = 42;
+#endif
 
         GameState board = GameState::random(startDepth);
 
@@ -40,3 +46,4 @@ TEST_CASE("Connect4::alphaBeta", "[slow]") {
         REQUIRE(minimaxValue == alphaBetaValue);
     }
 }
+

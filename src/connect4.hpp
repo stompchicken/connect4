@@ -1,7 +1,15 @@
 #include "gameState.hpp"
 #include "cache.hpp"
 
-class Stats {};
+#define LOG_STATS
+
+struct Stats {
+    long nodesExplored;
+};
+
+std::ostream& operator<<(std::ostream &output, const Stats &stats);
+
+
 
 class Connect4 {
   public:
@@ -14,16 +22,6 @@ class Connect4 {
     }
 
     Value alphaBeta(const GameState& board, Value alpha, Value beta, int maxDepth);
-
-    void printStats(double) {
-/*
-        std::cout << duration << "\t seconds" << std::endl;
-        std::cout << stats->nodesExplored / duration << "\t nodes per seconds" << std::endl;
-        std::cout << *stats << std::endl;
-
-        std::cout << cache->statistics() << std::endl;
-*/
-    }
 
   private:
     Cache* cache;
