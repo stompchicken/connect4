@@ -9,18 +9,24 @@ CacheValue randomCacheValue() {
 }
 
 TEST_CASE("Cache works", "[fast]") {
-    const int cacheSize = 16;
-    const int n = 1 << (cacheSize - 6);
+    const int cacheSize = 8;
     Cache cache(cacheSize);
-    for(int i=0; i < n; i++) {
-        GameState board = GameState::random();
 
-        CacheValue val1 = randomCacheValue();
-        REQUIRE(cache.put(board, val1) == true);
+    GameState state = GameState();
+    state.parse(".|.|.|.|.|.|.|\n"
+                ".|X|.|X|.|.|.|\n"
+                ".|.|.|.|.|.|.|\n"
+                ".|X|.|.|O|.|.|\n"
+                ".|.|.|.|.|.|.|\n"
+                ".|.|O|.|.|O|.|",
+                PLAYER_MAX, 0);
 
-        CacheValue val2;
-        REQUIRE(cache.get(board, val2) == true);
+    CacheValue val1;
+    val1.value = 54;
+    val1.depth = 2;
 
-        REQUIRE(val1 == val2);
-    }
+    REQUIRE(cache.put(state, val1) == true);
+    CacheValue val2;
+    REQUIRE(cache.get(state, val2) == true);
+    REQUIRE(val1 == val2);
 }
