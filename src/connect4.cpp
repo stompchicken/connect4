@@ -1,5 +1,20 @@
 #include "connect4.hpp"
 
+void orderChildren(GameState* children, int* moves) {
+    for(int i=0; i<WIDTH; i++) {
+        moves[i] = i;
+    }
+/*
+    moves[0] = 2;
+    moves[1] = 3;
+    moves[2] = 1;
+    moves[3] = 4;
+    moves[4] = 0;
+    moves[5] = 5;
+*/
+}
+
+
 Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta, int maxDepth) {
 
 #ifdef LOG_STATS
@@ -30,9 +45,12 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta, int m
         int bestMove = 0;
         value = (player == PLAYER_MAX) ? VALUE_MIN : VALUE_MAX;
 
+        int moveOrder[WIDTH];
+        orderChildren(children, moveOrder);
+
         for(unsigned i=0; i<WIDTH; i++) {
-            unsigned move = i;
-            GameState& child = children[i];
+            unsigned move = moveOrder[i];
+            GameState& child = children[move];
 
             if(!child.isValid()) continue;
 
