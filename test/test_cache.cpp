@@ -3,8 +3,24 @@
 #include <iomanip>
 
 TEST_CASE("Cache::packEntry", "[fast]") {
-    Entry entry = { 0x1ffffffffffff, 42, 24};
-    REQUIRE(unpackEntry(packEntry(entry)) == entry);
+    Key k1, k2;
+    Entry e1, e2;
+    Packed p1, p2;
+
+    e1.value = 42;
+    e1.depth = 24;
+    k1 = 123456789;
+    packEntry(k1, e1, p1);
+    unpackEntry(p1, k2, e2);
+
+    REQUIRE(k1 == k2);
+    REQUIRE(e1 == e2);
+
+    p1 = 123456789123456789;
+    unpackEntry(p1, k1, e1);
+    packEntry(k1, e1, p2);
+
+    REQUIRE(p1 == p2);
 }
 
 TEST_CASE("Cache::put", "[fast]") {
@@ -19,15 +35,15 @@ TEST_CASE("Cache::put", "[fast]") {
                 ".|.|O|.|.|O|.|",
                 PLAYER_MAX, 0);
 
-    CacheValue val1;
-    val1.value = 54;
-    val1.depth = 2;
+    Entry e1;
+    e1.value = 54;
+    e1.depth = 2;
 
-    REQUIRE(cache.put(state, val1) == true);
+    REQUIRE(cache.put(state, e1) == true);
 
-    Entry val2;
-    REQUIRE(cache.get(state, val2) == true);
-    REQUIRE(val1 == val2);
+    Entry e2;
+    REQUIRE(cache.get(state, e2) == true);
+    REQUIRE(e1 == e2);
 }
 
 
@@ -37,7 +53,6 @@ TEST_CASE("Cache::randomAccess", "[slow][hide]") {
     for(int i=0; i < 10000; i++) {
         GameState state = GameState::random();
         Entry val1;
-        val1.key = state.key();
         val1.value = rand() % 256;
         val1.depth = rand() % DEPTH_MAX;
 
@@ -48,5 +63,3 @@ TEST_CASE("Cache::randomAccess", "[slow][hide]") {
         REQUIRE(val1 == val2);
     }
 }
-
-

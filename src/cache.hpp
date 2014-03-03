@@ -7,15 +7,15 @@
 
 typedef uint32_t Hash;
 typedef uint64_t Key;
+typedef uint64_t Packed;
 
 struct Entry {
-    Key key;
     Value value;
     Depth depth;
 };
 
-uint64_t packEntry(Entry entry);
-Entry unpackEntry(uint64_t value);
+void packEntry(const Key& key, const Entry& entry, Packed& packed);
+void unpackEntry(const Packed& value, Key& key, Entry& entry);
 
 bool operator==(const Entry& lhs, const Entry& rhs);
 std::ostream& operator<<(std::ostream &output, const Entry &val);

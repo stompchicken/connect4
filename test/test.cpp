@@ -4,7 +4,7 @@
 int main( int argc, char* const argv[] )
 {
     srand(0);
-    int result = Catch::Session().run( argc, argv );
+    int result = Catch::Session().run(argc, argv);
     return result;
 }
 
