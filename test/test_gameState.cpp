@@ -2,7 +2,7 @@
 #include "gameState.hpp"
 
 void assertEval(std::string text, int value) {
-    GameState state = GameState::parse(text, PLAYER_MAX, 0);
+    GameState state = GameState::parse(text);
     CHECK(value == state.evaluate());
 }
 
@@ -32,8 +32,8 @@ TEST_CASE("GameState::evaluate", "[fast]") {
         "X|.|.|.|.|.|.|\n"
         "X|.|.|.|.|.|.|\n"
         "X|.|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|.|",
+        "O|.|.|.|.|.|.|\n"
+        "O|.|.|.|.|.|.|",
         VALUE_MAX);
 
 
@@ -186,15 +186,25 @@ TEST_CASE("GameState::Children", "[fast]") {
 TEST_CASE("GameState::parse", "[fast]") {
 
     GameState state = GameState::parse(
-        ".|.|.|.|.|X|\n"
-        ".|.|.|.|X|.|\n"
-        ".|.|.|X|.|.|\n"
-        ".|.|X|.|.|.|\n"
-        ".|.|.|.|.|.|",
-        PLAYER_MIN, 4);
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|X|.|X|.|\n"
+        ".|X|O|O|O|.|");
     state.assertInvariants();
-    REQUIRE(state.getDepth() == 4);
+    REQUIRE(state.getDepth() == 6);
     REQUIRE(state.getPlayer() == PLAYER_MIN);
+
+
+    state = GameState::parse(
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|X|.|X|.|\n"
+        ".|X|O|O|O|X|");
+    state.assertInvariants();
+    REQUIRE(state.getDepth() == 7);
+    REQUIRE(state.getPlayer() == PLAYER_MAX);
 }
 
 #elif WIDTH == 6 && HEIGHT == 5

@@ -160,7 +160,7 @@ GameState::GameState() : p1(0), p2(0), player(PLAYER_MAX), depth(0) {
 
 }
 
-GameState::GameState(uint64 p1_, uint64 p2_, int player_, int depth_) :
+GameState::GameState(uint64 p1_, uint64 p2_, Player player_, Depth depth_) :
     p1(p1_ & Bitboard::zeroBarrier), p2(p2_ & Bitboard::zeroBarrier), player(player_), depth(depth_) {
     this->generateDerivedFields();
 }
@@ -191,7 +191,7 @@ GameState GameState::random(Depth moves) {
         for(unsigned i=0; i<moves; i++) {
             GameState nodeBuffer[WIDTH];
             board.children(nodeBuffer);
-            int offset = rand();
+            unsigned offset = static_cast<unsigned>(rand());
             for(unsigned j=0; j<WIDTH; j++) {
                 board = nodeBuffer[(j + offset) % WIDTH];
                 if(board.isValid()) break;
@@ -201,12 +201,10 @@ GameState GameState::random(Depth moves) {
     return board;
 }
 
-GameState GameState::parse(std::string text, int player, int depth) {
+GameState GameState::parse(std::string text) {
     GameState state;
     state.p1 = Bitboard::parse(text, 'X');
     state.p2 = Bitboard::parse(text, 'O');
-    state.player = player;
-    state.depth = depth;
     state.generateDerivedFields();
     return state;
 }
@@ -260,13 +258,13 @@ Value GameState::evaluate() const {
     return VALUE_UNKNOWN;
 }
 
-Value GameState::heuristic() const {
+uint8 GameState::heuristic() const {
     Value val = evaluate();
     if(val != VALUE_UNKNOWN) {
         return val;
     } else {
-        int p13 = Bitboard::popcount(Bitboard::line3(p1 & ~p2));
-        int p23 = Bitboard::popcount(Bitboard::line3(p2 & ~p1));
+        uint8 p13 = Bitboard::popcount(Bitboard::line3(p1 & ~p2));
+        uint8 p23 = Bitboard::popcount(Bitboard::line3(p2 & ~p1));
         return (p13 - p23) + 128;
     }
 }
@@ -312,13 +310,22 @@ void GameState::generateDerivedFields() {
     this->xorHash = hasher.hash(this->p1, this->p2, this->player);
 
     uint64 board = this->p1 | this->p2;
+    this->depth = Bitboard::popcount(board);
+
+    if(Bitboard::popcount(this->p1) > Bitboard::popcount(this->p2)) {
+        this->player = PLAYER_MIN;
+    } else {
+        this->player = PLAYER_MAX;
+    }
+
+
     uint64 mask;
     for(unsigned col=0; col<WIDTH; col++) {
         this->emptyPos[col] = HEIGHT;
         for(unsigned row=0; row<HEIGHT; row++) {
             mask = Bitboard::toMask(row, col);
             if((board & mask) == 0) {
-                this->emptyPos[col] = row;
+                this->emptyPos[col] = static_cast<uint8>(row);
                 break;
             }
         }
@@ -332,7 +339,7 @@ void GameState::assertInvariants() const {
     assert(xorHash == hasher.hash(p1, p2, player));
 }
 
-void GameState::makeMove(unsigned row, unsigned col) {
+inline void GameState::makeMove(unsigned row, unsigned col) {
     if(player == PLAYER_MAX) {
         this->p1 |= Bitboard::toMask(row, col);
         this->player = PLAYER_MIN;
@@ -357,11 +364,26 @@ uint64 reverseBits(uint64 x) {
     return output;
 }
 
-int flipPlayer(int player) {
+int flipPlayer(Player player) {
     return player == PLAYER_MAX ? PLAYER_MIN : PLAYER_MAX;
 }
 
+std::string printPlayer(Player player) {
+    return player == PLAYER_MAX ? "PLAYER_MAX (X)" : "PLAYER_MIN (O)";
+}
+
+
 Value flipValue(Value value) {
     if(value == VALUE_UNKNOWN) return VALUE_UNKNOWN;
-    return 256 - value;
+    else if(value == VALUE_MAX) return VALUE_MIN;
+    else if(value == VALUE_MIN) return VALUE_MAX;
+    else return VALUE_DRAW;
+}
+
+std::string printValue(Value value) {
+    if(value == VALUE_UNKNOWN) return "VALUE_UNKNOWN";
+    else if(value == VALUE_MAX) return "VALUE_MAX (X wins)";
+    else if(value == VALUE_MIN) return "VALUE_MIN (O wins)";
+    else return "VALUE_DRAW";
+
 }

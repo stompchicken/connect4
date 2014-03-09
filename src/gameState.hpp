@@ -19,27 +19,29 @@ const static Player PLAYER_INVALID = 0;
 const static Player PLAYER_MAX = 1;
 const static Player PLAYER_MIN = 2;
 Player flipPlayer(Player player);
+std::string printPlayer(Player player);
 
-typedef int Value;
+typedef uint8 Value;
 const static Value VALUE_UNKNOWN = 0;
 const static Value VALUE_MIN = 1;
-const static Value VALUE_MAX = 255;
-const static Value VALUE_DRAW = 128;
+const static Value VALUE_DRAW = 2;
+const static Value VALUE_MAX = 3;
 Value flipValue(Value value);
+std::string printValue(Value value);
 
 typedef uint8 Move;
-const static Move MOVE_INVALID = 7;
+const static Move MOVE_INVALID = 8;
 
 typedef uint8 Depth;
-const static Depth DEPTH_MAX = 127;
+const static Depth DEPTH_MAX = 64;
 
 
 /*
 
 Bitboard structure, column major with zero barrier at max height
 
-X = P1
-O = P2
+X = P1 (maximising player)
+O = P2 (minimising player)
 
      0  1  2  3  4  5  6
    |XX|XX|XX|XX|XX|XX|XX|
@@ -77,8 +79,8 @@ class Bitboard {
     static uint64 line3(uint64);
     static uint64 line2(uint64);
 
-    inline static unsigned popcount(uint64 x) {
-        int c = 0;
+    inline static uint8 popcount(uint64 x) {
+        uint8 c = 0;
         for (; x > 0; x &= x -1) c++;
         return c;
     }
@@ -87,11 +89,15 @@ class Bitboard {
     static uint64 baseBarrier; // Has a bit set in the bottom row
 };
 
+uint64 makeZeroBarrier();
+uint64 makeBaseBarrier();
+
+
 class GameState {
 
   public:
     GameState();
-    GameState(uint64 p1, uint64 p2, int player, int depth);
+    GameState(uint64 p1, uint64 p2, Player player, Depth depth);
 
     GameState(const GameState& other);
     GameState& operator=(const GameState& other);
@@ -102,31 +108,31 @@ class GameState {
     friend std::ostream& operator<<(std::ostream& os, const GameState& board);
 
     static GameState random(Depth depth=16);
-    static GameState parse(std::string text, int player, int depth);
+    static GameState parse(std::string text);
 
     inline uint64 hash() const { return xorHash; }
     inline uint64 key() const {  return p1 | ((p1 | p2) + Bitboard::baseBarrier); }
 
-    inline int getPlayer() const { return player; }
+    inline Player getPlayer() const { return player; }
     inline void setPlayer(Player p) { this->player = p; }
     inline bool isValid() const { return player != PLAYER_INVALID; }
 
-    inline int getDepth() const { return depth; }
+    inline Depth getDepth() const { return depth; }
     inline void setDepth(Depth d) { this->depth = d; }
 
     void children(GameState* buffer) const;
     Value evaluate() const;
-    Value heuristic() const;
+    uint8 heuristic() const;
 
     std::string print() const;
 
     void assertInvariants() const;
 
 
-//  private:
+  private:
     uint64 p1, p2;
     Player player;
-    int depth;
+    Depth depth;
 
     // Derived fields
     uint8_t emptyPos[WIDTH];
@@ -142,7 +148,8 @@ class GameState {
 
         Hasher() {
             for(unsigned i=0; i<(2*SIZE)+1; i++) {
-                keys[i] = (static_cast<uint64>(rand()) << 32) | rand();
+                keys[i] = (static_cast<uint64>(rand()) << 32);
+                keys[i] |= static_cast<uint64>(rand());
             }
         }
 

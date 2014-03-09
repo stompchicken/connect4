@@ -12,6 +12,7 @@ typedef uint64_t Packed;
 struct Entry {
     Value value;
     Depth depth;
+    uint8_t bestMove;
 };
 
 void packEntry(const Key& key, const Entry& entry, Packed& packed);
@@ -30,15 +31,16 @@ class Cache {
     virtual ~Cache();
     bool get(const GameState& state, Entry& value) const;
     bool put(const GameState& state, const Entry& value);
+    void clear();
     std::string statistics() const;
 
   private:
     // Bit mask on low-order bits to get index
-    uint64_t mask;
+    const uint64_t mask;
     // Count of entries
     uint64_t size;
     // Number of entries in the hashtable
-    uint64_t capacity;
+    const uint64_t capacity;
     // Contains key, value pairs
     uint64_t* hashtable;
 
