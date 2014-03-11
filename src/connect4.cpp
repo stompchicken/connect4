@@ -3,16 +3,26 @@
 std::ostream& operator<<(std::ostream &output, const Stats &stats) {
     output << stats.nodesExplored << " nodes explored" << std::endl;
     output << stats.cutoffs << " cutoffs" << std::endl;
-    output << stats.cacheHits << " cache hits" << std::endl;
-    output << stats.cacheMisses << " cache misses" << std::endl;
+
+    float hitRate = float(stats.cacheHits)/float(stats.cacheHits+stats.cacheMisses);
+    output << hitRate << " cache hitrate (" << stats.cacheHits << "/" << stats.cacheHits+stats.cacheMisses << ")" << std::endl;
+
     return output;
 }
 
 
 void Connect4::orderChildren(GameState* ) {
-    for(unsigned i=0; i<WIDTH; i++) {
+/*    for(unsigned i=0; i<WIDTH; i++) {
         moves[i] = i;
     }
+*/
+
+    moves[0] = 2;
+    moves[1] = 3;
+    moves[2] = 1;
+    moves[3] = 4;
+    moves[4] = 0;
+    moves[5] = 5;
 }
 
 Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {

@@ -36,6 +36,7 @@ class Connect4 {
         stats = new Stats();
     }
     void clearCache() { cache->clear(); }
+    void printCacheStats() { std::cout << cache->statistics() << std::endl; }
 
   private:
     Cache* cache;
