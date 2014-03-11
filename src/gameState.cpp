@@ -369,7 +369,7 @@ int flipPlayer(Player player) {
 }
 
 std::string printPlayer(Player player) {
-    return player == PLAYER_MAX ? "PLAYER_MAX (X)" : "PLAYER_MIN (O)";
+    return player == PLAYER_MAX ? "PLAYER_MAX" : "PLAYER_MIN";
 }
 
 
@@ -382,8 +382,8 @@ Value flipValue(Value value) {
 
 std::string printValue(Value value) {
     if(value == VALUE_UNKNOWN) return "VALUE_UNKNOWN";
-    else if(value == VALUE_MAX) return "VALUE_MAX (X wins)";
-    else if(value == VALUE_MIN) return "VALUE_MIN (O wins)";
+    else if(value == VALUE_MAX) return "VALUE_MAX";
+    else if(value == VALUE_MIN) return "VALUE_MIN";
     else return "VALUE_DRAW";
 
 }

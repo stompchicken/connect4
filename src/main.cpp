@@ -15,8 +15,7 @@ int main(int argc, char* argv[]) {
     GameState board = GameState::random(depth);
     std::cout << board.print() << std::endl;
     std::clock_t start = std::clock();
-    unsigned pv[DEPTH_MAX];
-    Value value = game.alphaBeta(board, VALUE_MIN, VALUE_MAX, pv);
+    Value value = game.alphaBeta(board, VALUE_MIN, VALUE_MAX);
     std::clock_t end = std::clock();
     std::cout << "Value: " << value << std::endl;
     std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;

@@ -8,7 +8,8 @@ TEST_CASE("Cache::packEntry", "[fast]") {
     Entry e1, e2;
     Packed p1;
 
-    e1.value = VALUE_MAX;
+    e1.lower = VALUE_MIN;
+    e1.upper = VALUE_MAX;
     e1.depth = 12;
     e1.bestMove = 2;
     k1 = 12345678912345;
@@ -32,7 +33,8 @@ TEST_CASE("Cache::put", "[fast]") {
                 ".|X|O|O|X|O|X|");
 
     Entry e1;
-    e1.value = PLAYER_MIN;
+    e1.lower = VALUE_MIN;
+    e1.upper = VALUE_DRAW;
     e1.depth = 2;
     e1.bestMove = 1;
 
@@ -50,7 +52,11 @@ TEST_CASE("Cache::randomAccess", "[slow][hide]") {
     for(int i=0; i < 10000; i++) {
         GameState state = GameState::random();
         Entry val1;
-        val1.value = rand() % 4;
+
+        Value v1 = (rand() % 3) + 1;
+        Value v2 = (rand() % 3) + 1;
+        val1.lower = v1 < v2 ? v1 : v2;
+        val1.upper = v1 > v2 ? v1 : v2;
         val1.depth = rand() % DEPTH_MAX;
         val1.bestMove = rand() % 8;
 

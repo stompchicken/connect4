@@ -10,7 +10,8 @@ typedef uint64_t Key;
 typedef uint64_t Packed;
 
 struct Entry {
-    Value value;
+    Value lower;
+    Value upper;
     Depth depth;
     uint8_t bestMove;
 };
@@ -37,10 +38,10 @@ class Cache {
   private:
     // Bit mask on low-order bits to get index
     const uint64_t mask;
-    // Count of entries
-    uint64_t size;
     // Number of entries in the hashtable
     const uint64_t capacity;
+    // Count of entries
+    uint64_t size;
     // Contains key, value pairs
     uint64_t* hashtable;
 

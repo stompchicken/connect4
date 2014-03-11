@@ -3,7 +3,7 @@
 
 int main( int argc, char* const argv[] )
 {
-    srand(0);
+    srand(1234);
     int result = Catch::Session().run(argc, argv);
     return result;
 }

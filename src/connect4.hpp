@@ -1,16 +1,16 @@
 #include "gameState.hpp"
 #include "cache.hpp"
 
-#define ENABLE_STATS
-
 struct Stats {
     Stats() {
         nodesExplored = 0;
+        cutoffs = 0;
         cacheHits = 0;
         cacheMisses = 0;
     }
 
     long nodesExplored;
+    long cutoffs;
     long cacheHits;
     long cacheMisses;
 };
@@ -27,7 +27,9 @@ class Connect4 {
         delete stats;
     }
 
-    Value alphaBeta(const GameState& board, Value alpha, Value beta, unsigned* pv);
+    // Alpha-beta with caching
+    Value alphaBeta(const GameState& board, Value alpha, Value beta);
+
     const Stats& getStats() { return *stats; }
     void resetStats() {
         delete stats;
@@ -35,15 +37,19 @@ class Connect4 {
     }
     void clearCache() { cache->clear(); }
 
-//  private:
+  private:
     Cache* cache;
     Stats* stats;
+
+    // Pre-allocated state buffer
     GameState buffer[DEPTH_MAX*WIDTH];
     GameState* bufferStart;
 
+    // Mover ordering
     unsigned moves[WIDTH];
     void orderChildren(GameState* children);
 
+    // Optimal line of play
     unsigned principleVariation[DEPTH_MAX];
 
     Connect4(const Connect4& other);
