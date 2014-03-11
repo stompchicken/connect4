@@ -171,7 +171,9 @@ GameState::GameState(const GameState& other) {
     this->player = other.player;
     this->depth = other.depth;
     this->xorHash = other.xorHash;
-    std::copy(other.emptyPos, other.emptyPos+WIDTH, this->emptyPos);
+    for(int i=0; i<WIDTH; i++) {
+        this->emptyPos[i] = other.emptyPos[i];
+    }
 }
 
 GameState& GameState::operator=(const GameState& other) {
@@ -180,7 +182,9 @@ GameState& GameState::operator=(const GameState& other) {
     this->player = other.player;
     this->depth = other.depth;
     this->xorHash = other.xorHash;
-    std::copy(other.emptyPos, other.emptyPos+WIDTH, this->emptyPos);
+    for(int i=0; i<WIDTH; i++) {
+        this->emptyPos[i] = other.emptyPos[i];
+    }
     return *this;
 }
 
@@ -233,7 +237,9 @@ void GameState::children(GameState* buffer) const {
             child->p2 = p2;
             child->depth = depth;
             child->player = player;
-            std::copy(emptyPos, emptyPos+WIDTH, child->emptyPos);
+            for(int i=0; i<WIDTH; i++) {
+                child->emptyPos[i] = this->emptyPos[i];
+            }
             child->makeMove(row, col);
             unsigned index = Bitboard::toIndex(row, col);
             child->xorHash = hasher.incHash(xorHash, index, player);
