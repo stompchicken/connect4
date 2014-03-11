@@ -84,7 +84,7 @@ bool Cache::get(const GameState& state, Entry& entry) const {
 
 bool Cache::put(const GameState& state, const Entry& entry) {
 
-    int depth = (entry.depth >= DEPTH_MAX) ? entry.depth : DEPTH_MAX - 1;
+    int depth = (entry.depth < DEPTH_MAX) ? entry.depth : DEPTH_MAX - 1;
     Key key = state.key();
 
     uint64_t newValue;
