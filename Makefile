@@ -1,5 +1,5 @@
 INCLUDES=-Isrc -Itest
-OPTFLAGS=-g
+OPTFLAGS=-O3
 
 CFLAGS=$(OPTFLAGS) -Wall
 CFLAGS_DEV=$(CFLAGS) -DDEBUG -Wextra -pedantic #-Weverything

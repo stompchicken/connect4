@@ -10,7 +10,7 @@ int main(int argc, char* argv[]) {
 
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(28);
+    Connect4 game(20);
 
     GameState board = GameState::random(depth);
     std::cout << board.print() << std::endl;
@@ -19,5 +19,7 @@ int main(int argc, char* argv[]) {
     std::clock_t end = std::clock();
     std::cout << "Value: " << value << std::endl;
     std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
+    std::cout << game.getStats() << std::endl;
+    game.printCacheStats();
     return 0;
 }
