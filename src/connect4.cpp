@@ -61,7 +61,6 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
 
         Value a = alpha;
         Value b = beta;
-        unsigned bestMove;
 
         orderChildren(children);
         for(unsigned i=0; i<WIDTH; i++) {
@@ -75,13 +74,11 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 childVal = alphaBeta(child, a, beta);
                 if(value == VALUE_UNKNOWN || childVal > value) {
                     value = childVal;
-                    bestMove = move;
                     a = std::max(a, value);
                 }
             } else {
                 childVal = alphaBeta(child, alpha, b);
                 if(value == VALUE_UNKNOWN || childVal < value) {
-                    bestMove = move;
                     value = childVal;
                     b = std::min(b, value);
                 }
