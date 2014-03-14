@@ -29,6 +29,8 @@ class Connect4 {
 
     // Alpha-beta with caching
     Value alphaBeta(const GameState& board, Value alpha, Value beta);
+    void principleVariation(const GameState& board, unsigned* moves);
+
 
     const Stats& getStats() { return *stats; }
     void resetStats() {
@@ -46,13 +48,18 @@ class Connect4 {
     GameState buffer[DEPTH_MAX*WIDTH];
     GameState* bufferStart;
 
-    // Mover ordering
-    unsigned moves[WIDTH];
-    void orderChildren(GameState* children);
+    // Move ordering
+    struct Move {
+        int move;
+        uint8_t value;
+    };
+    void orderChildren(GameState* children, Player player, Move* moves);
+    static bool orderMax(const Move& lhs, const Move& rhs) { return lhs.value > rhs.value; }
+    static bool orderMin(const Move& lhs, const Move& rhs) { return lhs.value < rhs.value; }
 
     // Optimal line of play
-    unsigned principleVariation[DEPTH_MAX];
 
+    // No copying allowed
     Connect4(const Connect4& other);
     Connect4& operator=(const Connect4& other);
 

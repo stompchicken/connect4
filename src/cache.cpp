@@ -142,13 +142,13 @@ void Cache::clear() {
 std::string Cache::statistics() const {
     std::stringstream stats;
     stats.precision(4);
-
+/*
     for(int i=0; i<DEPTH_MAX; i++) {
         if(counts[i] > 0) {
             stats << "[" << i << "]\t" << this->counts[i] << std::endl;
         }
     }
-
+*/
     float load = float(this->size)/this->capacity;
     stats << "Load\t" << load << "\t(" << this->size << "/" << this->capacity << ")" << std::endl;
 

@@ -10,16 +10,20 @@ int main(int argc, char* argv[]) {
 
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(20);
+    Connect4 game(24);
 
     GameState board = GameState::random(depth);
     std::cout << board.print() << std::endl;
     std::clock_t start = std::clock();
     Value value = game.alphaBeta(board, VALUE_MIN, VALUE_MAX);
     std::clock_t end = std::clock();
-    std::cout << "Value: " << value << std::endl;
+    std::cout << "Value: " << printValue(value) << std::endl;
     std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
     std::cout << game.getStats() << std::endl;
-    game.printCacheStats();
+//    game.printCacheStats();
+
+    unsigned moves[100];
+    game.principleVariation(board, moves);
+
     return 0;
 }
