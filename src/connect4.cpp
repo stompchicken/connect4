@@ -1,11 +1,11 @@
 #include "connect4.hpp"
 
 #define MAX_CACHE_DEPTH 26
-#define MAX_LR_DEPTH 10
+#define MAX_LR_DEPTH 0
 
 std::ostream& operator<<(std::ostream &output, const Stats &stats) {
-    output << stats.nodesExplored << " nodes explored" << std::endl;
-    output << stats.cutoffs << " cutoffs" << std::endl;
+    output << static_cast<float>(stats.nodesExplored) << " nodes explored" << std::endl;
+    output << static_cast<float>(stats.cutoffs) << " cutoffs" << std::endl;
 
     float hitRate = float(stats.cacheHits)/float(stats.cacheHits+stats.cacheMisses);
     output << hitRate << " cache hitrate" << std::endl;
@@ -14,11 +14,19 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats) {
 }
 
 
-void Connect4::orderChildren(GameState*, Player, Move* moves) {
-/*
+void Connect4::orderChildren(GameState* children, unsigned bestMove, Player player, Move* moves) {
     for(unsigned i=0; i<WIDTH; i++) {
         moves[i].move = i;
-        moves[i].value = abs(i - WIDTH/2);
+        moves[i].value = abs(i - WIDTH/2.0f);
+/*
+        if(i == bestMove) {
+            if(player == PLAYER_MAX) {
+                moves[i].value = 255;
+            } else if (player == PLAYER_MIN) {
+                moves[i].value = 0;
+            }
+        }
+*/
     }
 
     if(player == PLAYER_MAX) {
@@ -26,14 +34,6 @@ void Connect4::orderChildren(GameState*, Player, Move* moves) {
     } else if (player == PLAYER_MIN) {
         std::sort(moves, moves+WIDTH, orderMin);
     }
-*/
-
-    moves[0].move = 2;
-    moves[1].move = 3;
-    moves[2].move = 1;
-    moves[3].move = 4;
-    moves[4].move = 0;
-    moves[5].move = 5;
 }
 
 Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
@@ -48,42 +48,44 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     assert(alpha <= beta);
 #endif
 
-    // Look up state in cache
-    Entry cacheEntry;
-
-    if(depth < MAX_CACHE_DEPTH && cache->get(state, cacheEntry)) {
-        stats->cacheHits++;
-
-        if(cacheEntry.lower == cacheEntry.upper) {
-            return cacheEntry.lower;
-        } else if(cacheEntry.lower >= beta) {
-            return cacheEntry.lower;
-        } else if(cacheEntry.upper <= alpha) {
-            return cacheEntry.upper;
-        }
-
-        alpha = std::max(alpha, cacheEntry.lower);
-        beta = std::min(beta, cacheEntry.upper);
-    } else {
-        stats->cacheMisses++;
-        cacheEntry.lower = VALUE_MIN;
-        cacheEntry.upper = VALUE_MAX;
-    }
 
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
         // Don't bother caching, evaluate is fast
         return value;
     } else {
+        // Look up state in cache
+        Entry cacheEntry;
+        unsigned bestMove = MOVE_INVALID;
+        if(depth < MAX_CACHE_DEPTH && cache->get(state, cacheEntry)) {
+            stats->cacheHits++;
+
+            if(cacheEntry.lower == cacheEntry.upper) {
+                return cacheEntry.lower;
+            } else if(cacheEntry.lower >= beta) {
+                return cacheEntry.lower;
+            } else if(cacheEntry.upper <= alpha) {
+                return cacheEntry.upper;
+            }
+
+            alpha = std::max(alpha, cacheEntry.lower);
+            beta = std::min(beta, cacheEntry.upper);
+
+            bestMove = cacheEntry.bestMove;
+        } else {
+            stats->cacheMisses++;
+            cacheEntry.lower = VALUE_MIN;
+            cacheEntry.upper = VALUE_MAX;
+        }
+
         GameState* children = bufferStart;
         state.children(children);
         bufferStart += WIDTH;
 
         Value a = alpha;
         Value b = beta;
-        unsigned bestMove = 0;
         Move moves[WIDTH];
-        orderChildren(children, player, moves);
+        orderChildren(children, bestMove, player, moves);
 
         for(unsigned i=0; i<WIDTH; i++) {
             const unsigned move = moves[i].move;

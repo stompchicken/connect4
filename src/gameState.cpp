@@ -275,6 +275,14 @@ uint8 GameState::heuristic() const {
     }
 }
 
+GameState GameState::flipLeftRight() const {
+    GameState flip;
+    flip.p1 = Bitboard::flipLeftRight(p1);
+    flip.p2 = Bitboard::flipLeftRight(p2);
+    flip.generateDerivedFields();
+    return flip;
+}
+
 std::string GameState::print() const {
     std::string text;
     uint64 mask;
@@ -358,7 +366,7 @@ inline void GameState::makeMove(unsigned row, unsigned col) {
 
 }
 
-uint64 reverseBits(uint64 x) {
+uint64 flipLeftRight(uint64 x) {
     uint64 output = 0;
     for(unsigned row=0; row<HEIGHT; row++) {
         for(unsigned col=0; col<WIDTH; col++) {

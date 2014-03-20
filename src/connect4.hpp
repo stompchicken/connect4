@@ -38,6 +38,7 @@ class Connect4 {
         stats = new Stats();
     }
     void clearCache() { cache->clear(); }
+    void clearCacheValues() { cache->clearValues(); }
     void printCacheStats() { std::cout << cache->statistics() << std::endl; }
 
   private:
@@ -53,7 +54,7 @@ class Connect4 {
         int move;
         uint8_t value;
     };
-    void orderChildren(GameState* children, Player player, Move* moves);
+    void orderChildren(GameState* children, unsigned bestMove, Player player, Move* moves);
     static bool orderMax(const Move& lhs, const Move& rhs) { return lhs.value > rhs.value; }
     static bool orderMin(const Move& lhs, const Move& rhs) { return lhs.value < rhs.value; }
 

@@ -33,6 +33,7 @@ class Cache {
     bool get(const GameState& state, Entry& value) const;
     bool put(const GameState& state, const Entry& value);
     void clear();
+    void clearValues();
     std::string statistics() const;
 
   private:

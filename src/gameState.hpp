@@ -30,7 +30,7 @@ Value flipValue(Value value);
 std::string printValue(Value value);
 
 typedef uint8 Move;
-const static Move MOVE_INVALID = 8;
+const static Move MOVE_INVALID = WIDTH+1;
 
 typedef uint8 Depth;
 const static Depth DEPTH_MAX = 64;
@@ -85,6 +85,18 @@ class Bitboard {
         return c;
     }
 
+    static uint64 flipLeftRight(uint64 x) {
+        uint64 flip = uint64(0);
+        for(unsigned col=0; col<WIDTH; col++) {
+            for(unsigned row=0; row<HEIGHT; row++) {
+                if(x & toMask(row, col)) {
+                    flip |= toMask(row, WIDTH-col-1);
+                }
+            }
+        }
+        return flip;
+    }
+
     static uint64 zeroBarrier; // Has a bit set for every valid piece location
     static uint64 baseBarrier; // Has a bit set in the bottom row
 };
@@ -123,6 +135,8 @@ class GameState {
     void children(GameState* buffer) const;
     Value evaluate() const;
     uint8 heuristic() const;
+
+    GameState flipLeftRight() const;
 
     std::string print() const;
 

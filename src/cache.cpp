@@ -23,7 +23,7 @@ void packEntry(const Key& key, const Entry& entry, Packed& packed) {
     assert(entry.upper < 4);
     assert(entry.lower <= entry.upper);
     assert(entry.depth < 64);
-    assert(entry.bestMove < 8);
+    assert(entry.bestMove <= MOVE_INVALID);
 #endif
 
     packed = static_cast<uint64_t>(0);
@@ -139,6 +139,17 @@ void Cache::clear() {
     }
 }
 
+void Cache::clearValues() {
+    Key key;
+    Entry entry;
+    for(uint64 index=0; index<this->capacity; index++) {
+        unpackEntry(this->hashtable[index], key, entry);
+        entry.lower = VALUE_MIN;
+        entry.upper = VALUE_MAX;
+        packEntry(key, entry, this->hashtable[index]);
+    }
+}
+
 std::string Cache::statistics() const {
     std::stringstream stats;
     stats.precision(4);
@@ -150,7 +161,7 @@ std::string Cache::statistics() const {
     }
 */
     float load = float(this->size)/this->capacity;
-    stats << "Load\t" << load << "\t(" << this->size << "/" << this->capacity << ")" << std::endl;
+    stats << load << "\t cache load" << std::endl;
 
     return stats.str();
 }

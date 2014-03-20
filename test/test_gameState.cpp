@@ -209,6 +209,26 @@ TEST_CASE("GameState::parse", "[fast]") {
 
 #elif WIDTH == 6 && HEIGHT == 5
 
+TEST_CASE("GameState::flipLeftRight", "[fast]") {
+    GameState state = GameState::parse(
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|X|.|\n"
+        ".|.|X|.|O|.|\n"
+        ".|X|O|O|X|O|");
+
+    GameState flip = state.flipLeftRight();
+    REQUIRE(flip.getPlayer() == state.getPlayer());
+    REQUIRE(flip.getDepth() == state.getDepth());
+    REQUIRE(flip.print() ==
+            ".|.|.|.|.|.|\n"
+            ".|.|.|.|.|.|\n"
+            ".|X|.|.|.|.|\n"
+            ".|O|.|X|.|.|\n"
+            "O|X|O|O|X|.|");
+}
+
+
 TEST_CASE("GameState::evaluate", "[fast]") {
     assertEval(
         ".|.|.|.|.|.|\n"
