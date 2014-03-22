@@ -1,4 +1,5 @@
 #include "connect4.hpp"
+#include <algorithm>
 
 #define MAX_CACHE_DEPTH 26
 #define MAX_LR_DEPTH 0
