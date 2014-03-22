@@ -14,19 +14,17 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats) {
 }
 
 
-void Connect4::orderChildren(GameState*, unsigned, Player player, Move* moves) {
+void MoveOrdering::orderMoves(GameState*, unsigned bestMove, Player player, Move* moves) {
     for(unsigned i=0; i<WIDTH; i++) {
         moves[i].move = i;
-        moves[i].value = abs(i - WIDTH/2.0f);
-/*
-        if(i == bestMove) {
-            if(player == PLAYER_MAX) {
-                moves[i].value = 0;
-            } else if (player == PLAYER_MIN) {
-                moves[i].value = 255;
-            }
+
+        if(player == PLAYER_MAX) {
+            moves[i].value = WIDTH - abs(i - 2.1f);
+            if(i == bestMove) moves[i].value = 100;
+        } else {
+            moves[i].value = 1 + abs(i - 2.1f);
+            if(i == bestMove) moves[i].value = 0;
         }
-*/
     }
 
     if(player == PLAYER_MAX) {
@@ -34,6 +32,7 @@ void Connect4::orderChildren(GameState*, unsigned, Player player, Move* moves) {
     } else if (player == PLAYER_MIN) {
         std::sort(moves, moves+WIDTH, orderMin);
     }
+
 }
 
 Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
@@ -47,7 +46,6 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     assert(depth < DEPTH_MAX);
     assert(alpha <= beta);
 #endif
-
 
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
@@ -84,8 +82,8 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
 
         Value a = alpha;
         Value b = beta;
-        Move moves[WIDTH];
-        orderChildren(children, bestMove, player, moves);
+        MoveOrdering::Move moves[WIDTH];
+        MoveOrdering::orderMoves(children, bestMove, player, moves);
 
         for(unsigned i=0; i<WIDTH; i++) {
             const unsigned move = moves[i].move;
@@ -120,12 +118,14 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
         if(depth < MAX_CACHE_DEPTH) {
             if(value <= alpha) {
                 cacheEntry.upper = value;
+                cacheEntry.bestMove = MOVE_INVALID;
             } else if (value > alpha && value < beta) {
                 cacheEntry.lower = value;
                 cacheEntry.upper = value;
                 cacheEntry.bestMove = bestMove;
             } else if(value >= beta) {
                 cacheEntry.lower = value;
+                cacheEntry.bestMove = MOVE_INVALID;
             }
             cacheEntry.depth = depth;
             cache->put(state, cacheEntry);

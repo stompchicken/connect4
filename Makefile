@@ -28,7 +28,7 @@ bin/test: setup $(OBJ) $(TEST_OBJ)
 	$(CXX) $(LDFLAGS) $(TEST_OBJ) -o bin/test
 
 build/%.o: src/%.cpp
-	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS_DEV)
+	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
 
 build/%.o: test/%.cpp
 	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)

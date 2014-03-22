@@ -17,9 +17,24 @@ struct Stats {
 
 std::ostream& operator<<(std::ostream &output, const Stats &stats);
 
+class MoveOrdering {
+  public:
+    // Move ordering
+    struct Move {
+        int move;
+        uint8_t value;
+    };
+    static void orderMoves(GameState* children, unsigned bestMove, Player player, Move* moves);
+    static bool orderMax(const Move& lhs, const Move& rhs) { return lhs.value > rhs.value; }
+    static bool orderMin(const Move& lhs, const Move& rhs) { return lhs.value < rhs.value; }
+
+};
+
 class Connect4 {
   public:
-    Connect4(int hashBits) : cache(new Cache(hashBits)), stats(new Stats()), bufferStart(buffer) {
+    Connect4(long cacheSize) : cache(new Cache(cacheSize)),
+                               stats(new Stats()),
+                               bufferStart(buffer) {
     }
 
     ~Connect4() {
@@ -49,14 +64,6 @@ class Connect4 {
     GameState buffer[DEPTH_MAX*WIDTH];
     GameState* bufferStart;
 
-    // Move ordering
-    struct Move {
-        int move;
-        uint8_t value;
-    };
-    void orderChildren(GameState* children, unsigned bestMove, Player player, Move* moves);
-    static bool orderMax(const Move& lhs, const Move& rhs) { return lhs.value > rhs.value; }
-    static bool orderMin(const Move& lhs, const Move& rhs) { return lhs.value < rhs.value; }
 
     // Optimal line of play
 

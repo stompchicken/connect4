@@ -2,6 +2,8 @@
 #include <ctime>
 #include <math.h>
 
+#define MB 131072
+
 int main(int argc, char* argv[]) {
 
     if(argc != 2) {
@@ -11,8 +13,7 @@ int main(int argc, char* argv[]) {
 
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    long size = pow(2, 24);
-    Connect4 game(size);
+    Connect4 game(2048*MB);
 
     GameState board = GameState::random(depth);
     std::cout << board.print() << std::endl;
@@ -23,7 +24,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
     std::cout << game.getStats();
     game.printCacheStats();
-/*
+    game.resetStats();
 
     game.clearCacheValues();
     std::cout << "Clearing cache" << std::endl;
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
     std::cout << game.getStats();
     game.printCacheStats();
-*/
+
 
     return 0;
 }

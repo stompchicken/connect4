@@ -43,7 +43,7 @@ Value minimax(const GameState& board, unsigned* variation) {
 
 TEST_CASE("Connect4::alphaBeta", "[fast]") {
 
-    Connect4 game(16);
+    Connect4 game(1024);
 
     GameState board = GameState::parse(
         "X|.|.|X|.|.|\n"
@@ -55,9 +55,47 @@ TEST_CASE("Connect4::alphaBeta", "[fast]") {
     REQUIRE(game.alphaBeta(board, VALUE_MIN, VALUE_MAX) == VALUE_MIN);
 }
 
+TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
+    MoveOrdering::Move moves[WIDTH];
+    GameState children[WIDTH];
+
+    MoveOrdering::orderMoves(children, MOVE_INVALID, PLAYER_MAX, moves);
+    REQUIRE(moves[0].move == 2);
+    REQUIRE(moves[1].move == 3);
+    REQUIRE(moves[2].move == 1);
+    REQUIRE(moves[3].move == 4);
+    REQUIRE(moves[4].move == 0);
+    REQUIRE(moves[5].move == 5);
+
+    MoveOrdering::orderMoves(children, MOVE_INVALID, PLAYER_MIN, moves);
+    REQUIRE(moves[0].move == 2);
+    REQUIRE(moves[1].move == 3);
+    REQUIRE(moves[2].move == 1);
+    REQUIRE(moves[3].move == 4);
+    REQUIRE(moves[4].move == 0);
+    REQUIRE(moves[5].move == 5);
+
+    MoveOrdering::orderMoves(children, 4, PLAYER_MAX, moves);
+    REQUIRE(moves[0].move == 4);
+    REQUIRE(moves[1].move == 2);
+    REQUIRE(moves[2].move == 3);
+    REQUIRE(moves[3].move == 1);
+    REQUIRE(moves[4].move == 0);
+    REQUIRE(moves[5].move == 5);
+
+    MoveOrdering::orderMoves(children, 1, PLAYER_MIN, moves);
+    REQUIRE(moves[0].move == 1);
+    REQUIRE(moves[1].move == 2);
+    REQUIRE(moves[2].move == 3);
+    REQUIRE(moves[3].move == 4);
+    REQUIRE(moves[4].move == 0);
+    REQUIRE(moves[5].move == 5);
+
+}
+
 TEST_CASE("Connect4::minimax", "[slow][hide]") {
     for(int i=0; i<1000; i++) {
-        Connect4 game(16);
+        Connect4 game(64*1024*1024);
 
 #if WIDTH == 6 && HEIGHT == 5
         int startDepth = 16;
@@ -74,6 +112,8 @@ TEST_CASE("Connect4::minimax", "[slow][hide]") {
 
         INFO(board.print());
         REQUIRE(minimaxValue == alphaBetaValue);
+        std::cout << "." << std::flush;
+        if((i+1) % 80 == 0) std::cout << std::endl;
 
     }
 }
