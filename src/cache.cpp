@@ -42,8 +42,7 @@ void unpackEntry(const Packed& value, Key& key, Entry& entry) {
     entry.bestMove = static_cast<uint8_t>(value >> 1) & 0x7;
 }
 
-Cache::Cache(int bits) : mask((static_cast<uint64_t>(1) << bits) - 1),
-                         capacity(static_cast<uint64_t>(1) << bits) {
+Cache::Cache(uint64_t capacity_) : capacity(capacity_) {
     size = 0;
     // Zero out the hashtable
     hashtable = new uint64_t[capacity]();
@@ -57,7 +56,7 @@ Cache::~Cache() {
 }
 
 bool Cache::get(const GameState& state, Entry& entry) const {
-    uint64_t startIndex = state.hash() & this->mask;
+    uint64_t startIndex = state.hash() % this->capacity;
     uint64_t index;
     Key key;
 
@@ -89,12 +88,11 @@ bool Cache::put(const GameState& state, const Entry& entry) {
     uint64_t newValue;
     packEntry(key, entry, newValue);
 
-    uint64_t startIndex = state.hash() & this->mask;
+    uint64_t startIndex = state.hash() % this->capacity;
     uint64_t index;
 
     Key currentKey;
     Entry currentEntry;
-
     for(uint64 offset = 0; offset < probe; offset++) {
         index = startIndex + offset;
 
@@ -104,6 +102,7 @@ bool Cache::put(const GameState& state, const Entry& entry) {
         }
 
         unpackEntry(this->hashtable[index], currentKey, currentEntry);
+
         if(currentKey == 0) {
             // Insert new entry
             this->hashtable[index] = newValue;

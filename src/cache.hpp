@@ -28,7 +28,7 @@ std::ostream& operator<<(std::ostream &output, const Entry &val);
  */
 class Cache {
   public:
-    Cache(int bits);
+    Cache(uint64_t capacity);
     virtual ~Cache();
     bool get(const GameState& state, Entry& value) const;
     bool put(const GameState& state, const Entry& value);
@@ -38,7 +38,7 @@ class Cache {
 
   private:
     // Bit mask on low-order bits to get index
-    const uint64_t mask;
+//    const uint64_t mask;
     // Number of entries in the hashtable
     const uint64_t capacity;
     // Count of entries

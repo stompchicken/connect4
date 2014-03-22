@@ -14,16 +14,16 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats) {
 }
 
 
-void Connect4::orderChildren(GameState* children, unsigned bestMove, Player player, Move* moves) {
+void Connect4::orderChildren(GameState*, unsigned, Player player, Move* moves) {
     for(unsigned i=0; i<WIDTH; i++) {
         moves[i].move = i;
         moves[i].value = abs(i - WIDTH/2.0f);
 /*
         if(i == bestMove) {
             if(player == PLAYER_MAX) {
-                moves[i].value = 255;
-            } else if (player == PLAYER_MIN) {
                 moves[i].value = 0;
+            } else if (player == PLAYER_MIN) {
+                moves[i].value = 255;
             }
         }
 */

@@ -22,7 +22,7 @@ TEST_CASE("Cache::packEntry", "[fast]") {
 }
 
 TEST_CASE("Cache::put", "[fast]") {
-    Cache cache(8);
+    Cache cache(256);
 
     GameState state = GameState();
     state.parse(".|O|.|.|.|.|.|\n"
@@ -46,8 +46,8 @@ TEST_CASE("Cache::put", "[fast]") {
 }
 
 
-TEST_CASE("Cache::randomAccess", "[slow][hide]") {
-    Cache cache(16);
+TEST_CASE("Cache::randomAccess", "[fast]") {
+    Cache cache(20000);
 
     for(int i=0; i < 10000; i++) {
         GameState state = GameState::random();
@@ -60,6 +60,8 @@ TEST_CASE("Cache::randomAccess", "[slow][hide]") {
         val1.depth = rand() % DEPTH_MAX;
         val1.bestMove = rand() % 8;
 
+
+        INFO(state.print())
         REQUIRE(cache.put(state, val1) == true);
 
         Entry val2;

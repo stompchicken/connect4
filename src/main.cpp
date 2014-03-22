@@ -1,5 +1,6 @@
 #include "connect4.hpp"
 #include <ctime>
+#include <math.h>
 
 int main(int argc, char* argv[]) {
 
@@ -10,7 +11,8 @@ int main(int argc, char* argv[]) {
 
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(28);
+    long size = pow(2, 24);
+    Connect4 game(size);
 
     GameState board = GameState::random(depth);
     std::cout << board.print() << std::endl;
@@ -21,7 +23,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
     std::cout << game.getStats();
     game.printCacheStats();
-
+/*
 
     game.clearCacheValues();
     std::cout << "Clearing cache" << std::endl;
@@ -33,7 +35,7 @@ int main(int argc, char* argv[]) {
     std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
     std::cout << game.getStats();
     game.printCacheStats();
-
+*/
 
     return 0;
 }
