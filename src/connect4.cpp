@@ -1,6 +1,9 @@
 #include "connect4.hpp"
 #include <algorithm>
 
+#include <math.h>
+
+
 #define MAX_CACHE_DEPTH 26
 #define MAX_LR_DEPTH 0
 
@@ -14,24 +17,54 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats) {
     return output;
 }
 
+#define SWAP_MAX(x, y) if(moves[x].value < moves[y].value) { temp = moves[y]; moves[y] = moves[x]; moves[x] = temp;  }
+#define SWAP_MIN(x, y) if(moves[x].value > moves[y].value) { temp = moves[y]; moves[y] = moves[x]; moves[x] = temp;  }
+
 
 void MoveOrdering::orderMoves(GameState*, unsigned bestMove, Player player, Move* moves) {
     for(unsigned i=0; i<WIDTH; i++) {
         moves[i].move = i;
 
         if(player == PLAYER_MAX) {
-            moves[i].value = WIDTH - abs(i - 2.1f);
+            moves[i].value = 2*WIDTH - 4*fabs(i - 2.25f);
             if(i == bestMove) moves[i].value = 100;
         } else {
-            moves[i].value = 1 + abs(i - 2.1f);
+            moves[i].value = 2 + 4*fabs(i - 2.25f);
             if(i == bestMove) moves[i].value = 0;
         }
     }
 
+    Move temp;
     if(player == PLAYER_MAX) {
-        std::sort(moves, moves+WIDTH, orderMax);
+        SWAP_MAX(1, 2);
+        SWAP_MAX(0, 2);
+        SWAP_MAX(0, 1);
+        SWAP_MAX(4, 5);
+        SWAP_MAX(3, 5);
+        SWAP_MAX(3, 4);
+        SWAP_MAX(0, 3);
+        SWAP_MAX(1, 4);
+        SWAP_MAX(2, 5);
+        SWAP_MAX(2, 4);
+        SWAP_MAX(1, 3);
+        SWAP_MAX(2, 3);
+
+//        std::sort(moves, moves+WIDTH, orderMax);
     } else if (player == PLAYER_MIN) {
-        std::sort(moves, moves+WIDTH, orderMin);
+        SWAP_MIN(1, 2);
+        SWAP_MIN(0, 2);
+        SWAP_MIN(0, 1);
+        SWAP_MIN(4, 5);
+        SWAP_MIN(3, 5);
+        SWAP_MIN(3, 4);
+        SWAP_MIN(0, 3);
+        SWAP_MIN(1, 4);
+        SWAP_MIN(2, 5);
+        SWAP_MIN(2, 4);
+        SWAP_MIN(1, 3);
+        SWAP_MIN(2, 3);
+
+//        std::sort(moves, moves+WIDTH, orderMin);
     }
 
 }
