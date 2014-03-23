@@ -119,62 +119,61 @@ TEST_CASE("GameState::evaluate", "[fast]") {
         VALUE_DRAW);
 }
 
-TEST_CASE("GameState::Children", "[fast]") {
+TEST_CASE("GameState::children", "[fast]") {
     GameState state = GameState::parse(
-        ".|.|O|.|.|.|X|\n"
-        ".|.|O|X|.|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|X|O|X|O|.|X|\n"
-        "O|X|O|X|O|.|X|",
-        PLAYER_MAX, 1);
+        ".|.|X|.|.|.|O|\n"
+        ".|.|O|O|.|.|X|\n"
+        ".|.|X|X|O|.|O|\n"
+        ".|.|O|O|X|.|X|\n"
+        ".|X|X|X|O|.|O|\n"
+        "X|O|O|O|X|.|X|");
 
     GameState buffer[WIDTH];
     state.children(buffer);
 
     std::string childStates[WIDTH] = {
-        ".|.|O|.|.|.|X|\n"
-        ".|.|O|X|.|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        "X|X|O|X|O|.|X|\n"
-        "O|X|O|X|O|.|X|",
+        ".|.|X|.|.|.|O|\n"
+        ".|.|O|O|.|.|X|\n"
+        ".|.|X|X|O|.|O|\n"
+        ".|.|O|O|X|.|X|\n"
+        "X|X|X|X|O|.|O|\n"
+        "X|O|O|O|X|.|X|",
 
-        ".|.|O|.|.|.|X|\n"
-        ".|.|O|X|.|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|X|O|X|O|.|X|\n"
-        ".|X|O|X|O|.|X|\n"
-        "O|X|O|X|O|.|X|",
+        ".|.|X|.|.|.|O|\n"
+        ".|.|O|O|.|.|X|\n"
+        ".|.|X|X|O|.|O|\n"
+        ".|X|O|O|X|.|X|\n"
+        ".|X|X|X|O|.|O|\n"
+        "X|O|O|O|X|.|X|",
 
         "",
 
-        ".|.|O|X|.|.|X|\n"
-        ".|.|O|X|.|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|X|O|X|O|.|X|\n"
-        "O|X|O|X|O|.|X|",
+        ".|.|X|X|.|.|O|\n"
+        ".|.|O|O|.|.|X|\n"
+        ".|.|X|X|O|.|O|\n"
+        ".|.|O|O|X|.|X|\n"
+        ".|X|X|X|O|.|O|\n"
+        "X|O|O|O|X|.|X|",
 
-        ".|.|O|.|.|.|X|\n"
-        ".|.|O|X|X|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|X|O|X|O|.|X|\n"
-        "O|X|O|X|O|.|X|",
+        ".|.|X|.|.|.|O|\n"
+        ".|.|O|O|X|.|X|\n"
+        ".|.|X|X|O|.|O|\n"
+        ".|.|O|O|X|.|X|\n"
+        ".|X|X|X|O|.|O|\n"
+        "X|O|O|O|X|.|X|",
 
-        ".|.|O|.|.|.|X|\n"
-        ".|.|O|X|.|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|.|O|X|O|.|X|\n"
-        ".|X|O|X|O|.|X|\n"
-        "O|X|O|X|O|X|X|",
+        ".|.|X|.|.|.|O|\n"
+        ".|.|O|O|.|.|X|\n"
+        ".|.|X|X|O|.|O|\n"
+        ".|.|O|O|X|.|X|\n"
+        ".|X|X|X|O|.|O|\n"
+        "X|O|O|O|X|X|X|",
 
         ""};
 
     for(int i=0; i<WIDTH; i++) {
         if(childStates[i].size() > 0) {
-            GameState child = GameState::parse(childStates[i], PLAYER_MIN, 2);
+            GameState child = GameState::parse(childStates[i]);
             child.assertInvariants();
             REQUIRE(child == buffer[i]);
         } else {
@@ -185,26 +184,32 @@ TEST_CASE("GameState::Children", "[fast]") {
 
 TEST_CASE("GameState::parse", "[fast]") {
 
-    GameState state = GameState::parse(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|X|.|X|.|\n"
-        ".|X|O|O|O|.|");
+    std::string board =
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|.|X|.|.|\n"
+        ".|X|O|O|O|.|.|";
+    GameState state = GameState::parse(board);
     state.assertInvariants();
     REQUIRE(state.getDepth() == 6);
-    REQUIRE(state.getPlayer() == PLAYER_MIN);
+    REQUIRE(state.getPlayer() == PLAYER_MAX);
+    REQUIRE(state.print() == board);
 
+    board =
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|.|X|.|.|\n"
+        ".|X|O|O|O|X|.|";
 
-    state = GameState::parse(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|X|.|X|.|\n"
-        ".|X|O|O|O|X|");
+    state = GameState::parse(board);
     state.assertInvariants();
     REQUIRE(state.getDepth() == 7);
-    REQUIRE(state.getPlayer() == PLAYER_MAX);
+    REQUIRE(state.getPlayer() == PLAYER_MIN);
+    REQUIRE(state.print() == board);
 }
 
 #elif WIDTH == 6 && HEIGHT == 5

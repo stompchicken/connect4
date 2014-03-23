@@ -21,21 +21,22 @@ TEST_CASE("Cache::packEntry", "[fast]") {
 
 }
 
+
 TEST_CASE("Cache::put", "[fast]") {
     Cache cache(256);
 
     GameState state = GameState();
-    state.parse(".|O|.|.|.|.|.|\n"
-                ".|X|.|.|.|.|.|\n"
-                ".|O|.|.|.|.|.|\n"
-                ".|X|.|.|.|.|.|\n"
-                ".|X|.|X|.|O|.|\n"
-                ".|X|O|O|X|O|X|");
+    state.parse(".|.|.|.|.|.|\n"
+                "X|.|.|.|.|.|\n"
+                "O|.|.|.|.|.|\n"
+                "X|.|.|.|.|.|\n"
+                "X|.|X|.|O|.|\n"
+                "X|O|O|X|O|X|");
 
     Entry e1;
     e1.lower = VALUE_MIN;
     e1.upper = VALUE_DRAW;
-    e1.depth = 2;
+    e1.depth = 13;
     e1.bestMove = 1;
 
     REQUIRE(cache.put(state, e1) == true);
@@ -47,9 +48,9 @@ TEST_CASE("Cache::put", "[fast]") {
 
 
 TEST_CASE("Cache::randomAccess", "[fast]") {
-    Cache cache(20000);
+    Cache cache(64*1024);
 
-    for(int i=0; i < 10000; i++) {
+    for(int i=0; i < 10; i++) {
         GameState state = GameState::random();
         Entry val1;
 
@@ -57,9 +58,8 @@ TEST_CASE("Cache::randomAccess", "[fast]") {
         Value v2 = (rand() % 3) + 1;
         val1.lower = v1 < v2 ? v1 : v2;
         val1.upper = v1 > v2 ? v1 : v2;
-        val1.depth = rand() % DEPTH_MAX;
+        val1.depth = state.getDepth();
         val1.bestMove = rand() % 8;
-
 
         INFO(state.print())
         REQUIRE(cache.put(state, val1) == true);
@@ -67,5 +67,5 @@ TEST_CASE("Cache::randomAccess", "[fast]") {
         Entry val2;
         REQUIRE(cache.get(state, val2) == true);
         REQUIRE(val1 == val2);
-    }
+        }
 }

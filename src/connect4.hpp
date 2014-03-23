@@ -1,6 +1,8 @@
 #include "gameState.hpp"
 #include "cache.hpp"
 
+#include <ctime>
+
 struct Stats {
     Stats() {
         nodesExplored = 0;
@@ -42,6 +44,8 @@ class Connect4 {
         delete stats;
     }
 
+    Value solve(const GameState& board);
+
     // Alpha-beta with caching
     Value alphaBeta(const GameState& board, Value alpha, Value beta);
     void principleVariation(const GameState& board, unsigned* moves);
@@ -54,7 +58,7 @@ class Connect4 {
     }
     void clearCache() { cache->clear(); }
     void clearCacheValues() { cache->clearValues(); }
-    void printCacheStats() { std::cout << cache->statistics() << std::endl; }
+    std::string getCacheStats() { return cache->statistics(); }
 
   private:
     Cache* cache;

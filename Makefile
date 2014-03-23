@@ -1,9 +1,8 @@
 INCLUDES=-Isrc -Itest
 OPTFLAGS=-O3
 
-CFLAGS=$(OPTFLAGS) -Wall
-CFLAGS_DEV=$(CFLAGS) -DDEBUG -Wextra -pedantic #-Weverything
-LDFLAGS=$(OPTFLAGS)
+CFLAGS=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include #-DDEBUG -Wextra -pedantic #-Weverything
+LDFLAGS=$(OPTFLAGS) -lpthread -L/usr/local/opt/ncurses/lib -lncurses
 
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp,build/%.o,$(SRC))
@@ -34,5 +33,5 @@ build/%.o: test/%.cpp
 	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
 
 clean:
-	rm -rf bin/*
-	rm -rf build/*
+	@rm -rf bin/*
+	@rm -rf build/*

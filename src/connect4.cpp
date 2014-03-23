@@ -3,9 +3,7 @@
 
 #include <math.h>
 
-
-#define MAX_CACHE_DEPTH 26
-#define MAX_LR_DEPTH 0
+#define MAX_CACHE_DEPTH WIDTH*HEIGHT
 
 std::ostream& operator<<(std::ostream &output, const Stats &stats) {
     output << static_cast<float>(stats.nodesExplored) << " nodes explored" << std::endl;
@@ -20,53 +18,55 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats) {
 #define SWAP_MAX(x, y) if(moves[x].value < moves[y].value) { temp = moves[y]; moves[y] = moves[x]; moves[x] = temp;  }
 #define SWAP_MIN(x, y) if(moves[x].value > moves[y].value) { temp = moves[y]; moves[y] = moves[x]; moves[x] = temp;  }
 
+uint8 moveOrderMax[WIDTH] = {2, 4, 6, 7, 5, 3};
+uint8 moveOrderMin[WIDTH] = {6, 4, 2, 1, 3, 5};
 
 void MoveOrdering::orderMoves(GameState*, unsigned bestMove, Player player, Move* moves) {
     for(unsigned i=0; i<WIDTH; i++) {
         moves[i].move = i;
 
         if(player == PLAYER_MAX) {
-            moves[i].value = 2*WIDTH - 4*fabs(i - 2.25f);
+            moves[i].value = moveOrderMax[i];
             if(i == bestMove) moves[i].value = 100;
         } else {
-            moves[i].value = 2 + 4*fabs(i - 2.25f);
+            moves[i].value = moveOrderMin[i];
             if(i == bestMove) moves[i].value = 0;
         }
     }
 
     Move temp;
     if(player == PLAYER_MAX) {
-        SWAP_MAX(1, 2);
-        SWAP_MAX(0, 2);
-        SWAP_MAX(0, 1);
-        SWAP_MAX(4, 5);
-        SWAP_MAX(3, 5);
-        SWAP_MAX(3, 4);
-        SWAP_MAX(0, 3);
-        SWAP_MAX(1, 4);
-        SWAP_MAX(2, 5);
-        SWAP_MAX(2, 4);
-        SWAP_MAX(1, 3);
-        SWAP_MAX(2, 3);
+/*
+        SWAP_MAX(1, 2); SWAP_MAX(0, 2); SWAP_MAX(0, 1); SWAP_MAX(3, 4);
+        SWAP_MAX(5, 6); SWAP_MAX(3, 5); SWAP_MAX(4, 6); SWAP_MAX(4, 5);
+        SWAP_MAX(0, 4); SWAP_MAX(0, 3); SWAP_MAX(1, 5); SWAP_MAX(2, 6);
+        SWAP_MAX(2, 5); SWAP_MAX(1, 3); SWAP_MAX(2, 4); SWAP_MAX(2, 3);
+*/
+        SWAP_MAX(1, 2); SWAP_MAX(0, 2); SWAP_MAX(0, 1); SWAP_MAX(4, 5);
+        SWAP_MAX(3, 5); SWAP_MAX(3, 4); SWAP_MAX(0, 3); SWAP_MAX(1, 4);
+        SWAP_MAX(2, 5); SWAP_MAX(2, 4); SWAP_MAX(1, 3); SWAP_MAX(2, 3);
 
-//        std::sort(moves, moves+WIDTH, orderMax);
+
     } else if (player == PLAYER_MIN) {
-        SWAP_MIN(1, 2);
-        SWAP_MIN(0, 2);
-        SWAP_MIN(0, 1);
-        SWAP_MIN(4, 5);
-        SWAP_MIN(3, 5);
-        SWAP_MIN(3, 4);
-        SWAP_MIN(0, 3);
-        SWAP_MIN(1, 4);
-        SWAP_MIN(2, 5);
-        SWAP_MIN(2, 4);
-        SWAP_MIN(1, 3);
-        SWAP_MIN(2, 3);
+/*
+        SWAP_MIN(1, 2); SWAP_MIN(0, 2); SWAP_MIN(0, 1); SWAP_MIN(3, 4);
+        SWAP_MIN(5, 6); SWAP_MIN(3, 5); SWAP_MIN(4, 6); SWAP_MIN(4, 5);
+        SWAP_MIN(0, 4); SWAP_MIN(0, 3); SWAP_MIN(1, 5); SWAP_MIN(2, 6);
+        SWAP_MIN(2, 5); SWAP_MIN(1, 3); SWAP_MIN(2, 4); SWAP_MIN(2, 3);
+*/
 
-//        std::sort(moves, moves+WIDTH, orderMin);
+        SWAP_MIN(1, 2); SWAP_MIN(0, 2); SWAP_MIN(0, 1); SWAP_MIN(4, 5);
+        SWAP_MIN(3, 5); SWAP_MIN(3, 4); SWAP_MIN(0, 3); SWAP_MIN(1, 4);
+        SWAP_MIN(2, 5); SWAP_MIN(2, 4); SWAP_MIN(1, 3); SWAP_MIN(2, 3);
+
     }
 
+
+}
+
+Value Connect4::solve(const GameState& state) {
+    Value value = alphaBeta(state, VALUE_MIN, VALUE_MAX);
+    return value;
 }
 
 Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
@@ -89,7 +89,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
         // Look up state in cache
         Entry cacheEntry;
         unsigned bestMove = MOVE_INVALID;
-        if(depth < MAX_CACHE_DEPTH && cache->get(state, cacheEntry)) {
+        if(depth <= MAX_CACHE_DEPTH && cache->get(state, cacheEntry)) {
             stats->cacheHits++;
 
             if(cacheEntry.lower == cacheEntry.upper) {
@@ -103,7 +103,11 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             alpha = std::max(alpha, cacheEntry.lower);
             beta = std::min(beta, cacheEntry.upper);
 
-            bestMove = cacheEntry.bestMove;
+/*
+            if(cacheEntry.bestMove != MOVE_INVALID) {
+                bestMove = cacheEntry.bestMove;
+            }
+*/
         } else {
             stats->cacheMisses++;
             cacheEntry.lower = VALUE_MIN;
@@ -149,7 +153,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
         }
 
         // Store new bounds to cache
-        if(depth < MAX_CACHE_DEPTH) {
+        if(depth <= MAX_CACHE_DEPTH) {
             if(value <= alpha) {
                 cacheEntry.upper = value;
                 cacheEntry.bestMove = MOVE_INVALID;

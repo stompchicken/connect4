@@ -39,8 +39,6 @@ Value minimax(const GameState& board, unsigned* variation) {
     }
 }
 
-
-
 TEST_CASE("Connect4::alphaBeta", "[fast]") {
 
     Connect4 game(1024);
@@ -60,37 +58,36 @@ TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
     GameState children[WIDTH];
 
     MoveOrdering::orderMoves(children, MOVE_INVALID, PLAYER_MAX, moves);
-    REQUIRE(moves[0].move == 2);
-    REQUIRE(moves[1].move == 3);
-    REQUIRE(moves[2].move == 1);
-    REQUIRE(moves[3].move == 4);
-    REQUIRE(moves[4].move == 0);
-    REQUIRE(moves[5].move == 5);
+    REQUIRE(moves[0].move == 3);
+    REQUIRE(moves[1].move == 2);
+    REQUIRE(moves[2].move == 4);
+    REQUIRE(moves[3].move == 1);
+    REQUIRE(moves[4].move == 5);
+    REQUIRE(moves[5].move == 0);
 
     MoveOrdering::orderMoves(children, MOVE_INVALID, PLAYER_MIN, moves);
-    REQUIRE(moves[0].move == 2);
-    REQUIRE(moves[1].move == 3);
-    REQUIRE(moves[2].move == 1);
-    REQUIRE(moves[3].move == 4);
-    REQUIRE(moves[4].move == 0);
-    REQUIRE(moves[5].move == 5);
+    REQUIRE(moves[0].move == 3);
+    REQUIRE(moves[1].move == 2);
+    REQUIRE(moves[2].move == 4);
+    REQUIRE(moves[3].move == 1);
+    REQUIRE(moves[4].move == 5);
+    REQUIRE(moves[5].move == 0);
 
     MoveOrdering::orderMoves(children, 4, PLAYER_MAX, moves);
     REQUIRE(moves[0].move == 4);
-    REQUIRE(moves[1].move == 2);
-    REQUIRE(moves[2].move == 3);
+    REQUIRE(moves[1].move == 3);
+    REQUIRE(moves[2].move == 2);
     REQUIRE(moves[3].move == 1);
-    REQUIRE(moves[4].move == 0);
-    REQUIRE(moves[5].move == 5);
+    REQUIRE(moves[4].move == 5);
+    REQUIRE(moves[5].move == 0);
 
     MoveOrdering::orderMoves(children, 1, PLAYER_MIN, moves);
     REQUIRE(moves[0].move == 1);
-    REQUIRE(moves[1].move == 2);
-    REQUIRE(moves[2].move == 3);
+    REQUIRE(moves[1].move == 3);
+    REQUIRE(moves[2].move == 2);
     REQUIRE(moves[3].move == 4);
-    REQUIRE(moves[4].move == 0);
-    REQUIRE(moves[5].move == 5);
-
+    REQUIRE(moves[4].move == 5);
+    REQUIRE(moves[5].move == 0);
 }
 
 TEST_CASE("Connect4::minimax", "[slow][hide]") {
@@ -101,7 +98,6 @@ TEST_CASE("Connect4::minimax", "[slow][hide]") {
         int startDepth = 16;
 #elif WIDTH == 7 && HEIGHT == 6
         int startDepth = 32;
-        int maxDepth = 42;
 #endif
 
         GameState board = GameState::random(startDepth);
