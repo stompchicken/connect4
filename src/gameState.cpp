@@ -321,18 +321,20 @@ std::ostream& operator<<(std::ostream& os, const GameState& board) {
 }
 
 void GameState::generateDerivedFields() {
-    this->xorHash = hasher.hash(this->p1, this->p2, this->player);
-
     uint64 board = this->p1 | this->p2;
     this->depth = Bitboard::popcount(board);
 
+    // Infer player from number of pieces on the board
     if(Bitboard::popcount(this->p1) > Bitboard::popcount(this->p2)) {
         this->player = PLAYER_MIN;
     } else {
         this->player = PLAYER_MAX;
     }
 
+    // Generate hash
+    this->xorHash = hasher.hash(this->p1, this->p2, this->player);
 
+    // Generate empty positions
     uint64 mask;
     for(unsigned col=0; col<WIDTH; col++) {
         this->emptyPos[col] = HEIGHT;
