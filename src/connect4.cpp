@@ -21,44 +21,44 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats) {
 uint8 moveOrderMax[WIDTH] = {2, 4, 6, 7, 5, 3};
 uint8 moveOrderMin[WIDTH] = {6, 4, 2, 1, 3, 5};
 
-void MoveOrdering::orderMoves(GameState*, unsigned bestMove, Player player, Move* moves) {
+void MoveOrdering::orderMoves(GameState* children, unsigned bestMove, Player player, Move* moves) {
     for(unsigned i=0; i<WIDTH; i++) {
         moves[i].move = i;
 
         if(player == PLAYER_MAX) {
             moves[i].value = moveOrderMax[i];
-            if(i == bestMove) moves[i].value = 100;
+//            if(i == bestMove) moves[i].value = 100;
         } else {
             moves[i].value = moveOrderMin[i];
-            if(i == bestMove) moves[i].value = 0;
+//            if(i == bestMove) moves[i].value = 0;
         }
     }
 
     Move temp;
     if(player == PLAYER_MAX) {
-/*
+
+#if WIDTH == 7
         SWAP_MAX(1, 2); SWAP_MAX(0, 2); SWAP_MAX(0, 1); SWAP_MAX(3, 4);
         SWAP_MAX(5, 6); SWAP_MAX(3, 5); SWAP_MAX(4, 6); SWAP_MAX(4, 5);
         SWAP_MAX(0, 4); SWAP_MAX(0, 3); SWAP_MAX(1, 5); SWAP_MAX(2, 6);
         SWAP_MAX(2, 5); SWAP_MAX(1, 3); SWAP_MAX(2, 4); SWAP_MAX(2, 3);
-*/
+#else
         SWAP_MAX(1, 2); SWAP_MAX(0, 2); SWAP_MAX(0, 1); SWAP_MAX(4, 5);
         SWAP_MAX(3, 5); SWAP_MAX(3, 4); SWAP_MAX(0, 3); SWAP_MAX(1, 4);
         SWAP_MAX(2, 5); SWAP_MAX(2, 4); SWAP_MAX(1, 3); SWAP_MAX(2, 3);
-
+#endif
 
     } else if (player == PLAYER_MIN) {
-/*
+#if WIDTH == 7
         SWAP_MIN(1, 2); SWAP_MIN(0, 2); SWAP_MIN(0, 1); SWAP_MIN(3, 4);
         SWAP_MIN(5, 6); SWAP_MIN(3, 5); SWAP_MIN(4, 6); SWAP_MIN(4, 5);
         SWAP_MIN(0, 4); SWAP_MIN(0, 3); SWAP_MIN(1, 5); SWAP_MIN(2, 6);
         SWAP_MIN(2, 5); SWAP_MIN(1, 3); SWAP_MIN(2, 4); SWAP_MIN(2, 3);
-*/
-
+#else
         SWAP_MIN(1, 2); SWAP_MIN(0, 2); SWAP_MIN(0, 1); SWAP_MIN(4, 5);
         SWAP_MIN(3, 5); SWAP_MIN(3, 4); SWAP_MIN(0, 3); SWAP_MIN(1, 4);
         SWAP_MIN(2, 5); SWAP_MIN(2, 4); SWAP_MIN(1, 3); SWAP_MIN(2, 3);
-
+#endif
     }
 
 

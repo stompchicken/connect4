@@ -153,6 +153,9 @@ std::string Cache::statistics() const {
     std::stringstream stats;
     stats.precision(4);
 
+    float load = float(this->size*100)/this->capacity;
+    stats << "Load:\t\t" << load << "%%" << std::endl;
+
     int maxDepth = 0;
     for(int i=0; i<DEPTH_MAX; i++) {
         if(counts[i] > 0) {
@@ -164,8 +167,6 @@ std::string Cache::statistics() const {
         stats << "[" << i << "]\t" << this->counts[i] << std::endl;
     }
 
-    float load = float(this->size)/this->capacity;
-    stats << load << "\t cache load" << std::endl;
 
     return stats.str();
 }

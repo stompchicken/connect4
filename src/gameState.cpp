@@ -266,8 +266,12 @@ Value GameState::evaluate() const {
 
 uint8 GameState::heuristic() const {
     Value val = evaluate();
-    if(val != VALUE_UNKNOWN) {
-        return val;
+    if(val == VALUE_MAX) {
+        return 255;
+    } else if(val == VALUE_MIN) {
+        return 0;
+    } else if(val == VALUE_DRAW) {
+        return 128;
     } else {
         uint8 p13 = Bitboard::popcount(Bitboard::line3(p1 & ~p2));
         uint8 p23 = Bitboard::popcount(Bitboard::line3(p2 & ~p1));

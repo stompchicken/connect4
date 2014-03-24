@@ -39,6 +39,22 @@ Value minimax(const GameState& board, unsigned* variation) {
     }
 }
 
+#if WIDTH == 7
+TEST_CASE("Connect4::alphaBeta", "[fast]") {
+
+    Connect4 game(1024);
+
+    GameState board = GameState::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|X|.|.|X|.|.|\n"
+        ".|O|.|.|O|.|.|\n"
+        ".|X|O|.|X|X|.|\n"
+        ".|O|X|X|O|O|.|\n"
+        ".|X|O|O|X|O|X|\n");
+    // Winning line: [2, 2, 3]
+    REQUIRE(game.alphaBeta(board, VALUE_MIN, VALUE_MAX) == VALUE_MIN);
+}
+#else
 TEST_CASE("Connect4::alphaBeta", "[fast]") {
 
     Connect4 game(1024);
@@ -52,7 +68,11 @@ TEST_CASE("Connect4::alphaBeta", "[fast]") {
     // Winning line: [1, 1, 2]
     REQUIRE(game.alphaBeta(board, VALUE_MIN, VALUE_MAX) == VALUE_MIN);
 }
+#endif
 
+#if WIDTH == 7
+
+#else
 TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
     MoveOrdering::Move moves[WIDTH];
     GameState children[WIDTH];
@@ -89,14 +109,15 @@ TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
     REQUIRE(moves[4].move == 5);
     REQUIRE(moves[5].move == 0);
 }
+#endif
 
 TEST_CASE("Connect4::minimax", "[slow][hide]") {
     for(int i=0; i<1000; i++) {
         Connect4 game(64*1024*1024);
 
-#if WIDTH == 6 && HEIGHT == 5
+#if WIDTH == 6
         int startDepth = 16;
-#elif WIDTH == 7 && HEIGHT == 6
+#elif WIDTH == 7
         int startDepth = 32;
 #endif
 

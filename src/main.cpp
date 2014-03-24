@@ -31,6 +31,10 @@ void* printStats(void *arg){
         printw("%e nodes explored/s\n", (double)stats.nodesExplored/duration);
 
         printw("\nCache statistics:\n");
+        double hitRate = float(stats.cacheHits*100)/float(stats.cacheHits+stats.cacheMisses);
+        printw("Hitrate:\t%.2f%%\n", hitRate);
+
+
         printw(game->getCacheStats().c_str());
         printw("\n");
 
@@ -58,7 +62,7 @@ int main(int argc, char* argv[]) {
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(2048*MB);
+    Connect4 game(1024*MB);
 
 
     GameState board = GameState::random(depth);
