@@ -163,10 +163,9 @@ std::string Cache::statistics() const {
         }
     }
 
-    for(int i=0; i<maxDepth; i++) {
+    for(int i=0; i<=maxDepth; i++) {
         stats << "[" << i << "]\t" << this->counts[i] << std::endl;
     }
-
 
     return stats.str();
 }

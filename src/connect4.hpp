@@ -21,16 +21,35 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats);
 
 class MoveOrdering {
   public:
+    MoveOrdering() {
+        for(int depth=0; depth<DEPTH_MAX; depth++) {
+            killerMove[depth] = MOVE_INVALID;
+
+            for(unsigned i=0; i<WIDTH; i++) {
+                moves[depth*i].move = 0;
+                moves[depth*i].value = 0;
+            }
+
+        }
+    }
+
     // Move ordering
     struct Move {
-        int move;
-        uint8_t value;
+        unsigned move;
+        unsigned value;
     };
-    static void orderMoves(GameState* children, unsigned bestMove, Player player, Move* moves);
-    static bool orderMax(const Move& lhs, const Move& rhs) { return lhs.value > rhs.value; }
-    static bool orderMin(const Move& lhs, const Move& rhs) { return lhs.value < rhs.value; }
+
+    void orderMoves(const GameState& parent, GameState* children, unsigned bestMove);
+    Move* getMoves(Depth depth) { return moves + (depth * WIDTH); }
+
+
+    Move moves[WIDTH*DEPTH_MAX];
+    unsigned killerMove[DEPTH_MAX];
 
 };
+
+std::ostream& operator<<(std::ostream &output, const MoveOrdering &moveOrdering);
+
 
 class Connect4 {
   public:
@@ -51,14 +70,14 @@ class Connect4 {
     void principleVariation(const GameState& board, unsigned* moves);
 
 
-    const Stats& getStats() { return *stats; }
+    const Stats& getStats() const { return *stats; }
     void resetStats() {
         delete stats;
         stats = new Stats();
     }
     void clearCache() { cache->clear(); }
     void clearCacheValues() { cache->clearValues(); }
-    std::string getCacheStats() { return cache->statistics(); }
+    std::string getCacheStats() const { return cache->statistics(); }
 
   private:
     Cache* cache;
@@ -68,8 +87,10 @@ class Connect4 {
     GameState buffer[DEPTH_MAX*WIDTH];
     GameState* bufferStart;
 
+    MoveOrdering moveOrdering;
 
     // Optimal line of play
+
 
     // No copying allowed
     Connect4(const Connect4& other);

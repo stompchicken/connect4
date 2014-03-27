@@ -74,10 +74,43 @@ TEST_CASE("Connect4::alphaBeta", "[fast]") {
 
 #else
 TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
-    MoveOrdering::Move moves[WIDTH];
-    GameState children[WIDTH];
 
-    MoveOrdering::orderMoves(children, MOVE_INVALID, PLAYER_MAX, moves);
+    MoveOrdering moveOrdering;
+    GameState parent = GameState::parse(
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|X|.|.|.|\n");
+    GameState children[WIDTH];
+    parent.children(children);
+
+    moveOrdering.killerMove[1] = MOVE_INVALID;
+    moveOrdering.orderMoves(parent, children, MOVE_INVALID);
+
+    // 0  1  2  3  4  5
+    //{2, 4, 6, 7, 5, 3};
+
+    REQUIRE(moveOrdering.moves[0].move == 3);
+    REQUIRE(moveOrdering.moves[1].move == 2);
+    REQUIRE(moveOrdering.moves[2].move == 4);
+    REQUIRE(moveOrdering.moves[3].move == 1);
+    REQUIRE(moveOrdering.moves[4].move == 5);
+    REQUIRE(moveOrdering.moves[5].move == 0);
+
+    moveOrdering.killerMove[1] = 5;
+    moveOrdering.orderMoves(parent, children, MOVE_INVALID);
+
+    REQUIRE(moveOrdering.moves[0].move == 5);
+    REQUIRE(moveOrdering.moves[1].move == 3);
+    REQUIRE(moveOrdering.moves[2].move == 2);
+    REQUIRE(moveOrdering.moves[3].move == 4);
+    REQUIRE(moveOrdering.moves[4].move == 1);
+    REQUIRE(moveOrdering.moves[5].move == 0);
+
+
+/*
+    moveOrdering.orderMoves(parent, children, MOVE_INVALID);
     REQUIRE(moves[0].move == 3);
     REQUIRE(moves[1].move == 2);
     REQUIRE(moves[2].move == 4);
@@ -85,6 +118,7 @@ TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
     REQUIRE(moves[4].move == 5);
     REQUIRE(moves[5].move == 0);
 
+    moveOrdering.orderMoves(children, MOVE_INVALID, PLAYER_MAX);
     MoveOrdering::orderMoves(children, MOVE_INVALID, PLAYER_MIN, moves);
     REQUIRE(moves[0].move == 3);
     REQUIRE(moves[1].move == 2);
@@ -108,6 +142,7 @@ TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
     REQUIRE(moves[3].move == 4);
     REQUIRE(moves[4].move == 5);
     REQUIRE(moves[5].move == 0);
+*/
 }
 #endif
 

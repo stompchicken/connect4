@@ -10,46 +10,42 @@
 
 bool terminate = false;
 
-void* printStats(void *arg){
+void printStats(const Connect4& game, double duration) {
+    const Stats& stats = game.getStats();
+    clear();
+    printw("Duration: %.2f\n\n", duration);
+    printw("%e nodes explored\n", (double)stats.nodesExplored);
+    printw("%e nodes explored/s\n", (double)stats.nodesExplored/duration);
+
+    printw("\nCache statistics:\n");
+    double hitRate = float(stats.cacheHits*100)/float(stats.cacheHits+stats.cacheMisses);
+    printw("Hitrate:\t%.2f%%\n", hitRate);
+
+    printw(game.getCacheStats().c_str());
+    printw("\n");
+    refresh();
+}
+
+void* statsLoop(void *arg){
     Connect4* game = (Connect4*)arg;
-
-
     std::clock_t start = std::clock();
 
     initscr();
     double duration;
-
     while(!terminate) {
-        clear();
-
         duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
-
-        const Stats& stats = game->getStats();
-
-        printw("Duration: %.2f\n\n", duration);
-        printw("%e nodes explored\n", (double)stats.nodesExplored);
-        printw("%e nodes explored/s\n", (double)stats.nodesExplored/duration);
-
-        printw("\nCache statistics:\n");
-        double hitRate = float(stats.cacheHits*100)/float(stats.cacheHits+stats.cacheMisses);
-        printw("Hitrate:\t%.2f%%\n", hitRate);
-
-
-        printw(game->getCacheStats().c_str());
-        printw("\n");
-
-        refresh();
+        printStats(*game, duration);
         sleep(1);
     }
 
-
+    duration = (std::clock() - start) / (double) CLOCKS_PER_SEC;
+    printStats(*game, duration);
     printw("Press any key to exit\n");
     getch();
 
     endwin();
 
-    std::clock_t end = std::clock();
-    std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
+    std::cout << "Duration: " << duration << std::endl;
 
     return NULL;
 }
@@ -62,22 +58,32 @@ int main(int argc, char* argv[]) {
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(1024*MB);
+    Connect4 game(256*MB);
 
+//    GameState board = GameState::random(depth);
 
-    GameState board = GameState::random(depth);
+    GameState state = GameState::parse(
+        ".|.|O|X|.|.|\n"
+        ".|.|X|O|O|.|\n"
+        "X|.|O|X|X|.|\n"
+        "O|X|X|O|O|X|\n"
+        "X|O|O|X|X|O|");
+
     std::cout << "Solving:" << std::endl;
-    std::cout << board.print() << std::endl;
+    std::cout << state.print() << std::endl;
+    std::cout << "Depth=" << (int)state.getDepth() << std::endl;
+    std::cout << "Player=" << printPlayer(state.getPlayer()) << std::endl;
+    std::cout << "Key=" << state.key() << std::endl;
 
-    pthread_t statsThread;
-    pthread_create(&statsThread, NULL, printStats, (void*)&game);
+//    pthread_t statsThread;
+//    pthread_create(&statsThread, NULL, statsLoop, (void*)&game);
 
-    Value value = game.solve(board);
+    Value value = game.solve(state);
 
     terminate = true;
-    pthread_join(statsThread, NULL);
+//    pthread_join(statsThread, NULL);
 
-    std::cout << "Value: " << printValue(value) << std::endl;
+    std::cout << "Value=" << printValue(value) << std::endl;
 
 
 //    game.resetStats();
