@@ -15,58 +15,6 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats) {
     return output;
 }
 
-std::ostream& operator<<(std::ostream &output, const MoveOrdering &moveOrdering) {
-    output << "{ MoveOrdering " << std::endl;
-    for(unsigned d=0; d<DEPTH_MAX; d++) {
-        std::cout << d << " ";
-        for(unsigned i=0; i<WIDTH; i++) {
-            output << "(" << moveOrdering.moves[d*i].move << "," << moveOrdering.moves[d*i].value << ") ";
-        }
-        output << std::endl;
-    }
-    output << "}";
-    return output;
-}
-
-
-#define SWAP(x, y) if(moveBuffer[x].value < moveBuffer[y].value) { temp = moveBuffer[y]; moveBuffer[y] = moveBuffer[x]; moveBuffer[x] = temp;  }
-
-uint8 staticMoveOrder[WIDTH] = {2, 4, 6, 7, 5, 3};
-
-void MoveOrdering::orderMoves(const GameState& parent, GameState*, unsigned) {
-    Depth depth = parent.getDepth();
-//    Player player = parent.getPlayer();
-
-    Move* moveBuffer = getMoves(depth);
-
-    for(unsigned i=0; i<WIDTH; i++) {
-        moveBuffer[i].move = i;
-        moveBuffer[i].value = staticMoveOrder[i];
-        if(i == killerMove[depth]) {
-            moveBuffer[i].value = 100;
-        }
-    }
-
-    Move temp;
-#if WIDTH == 7
-    SWAP(1, 2); SWAP(0, 2); SWAP(0, 1); SWAP(3, 4);
-    SWAP(5, 6); SWAP(3, 5); SWAP(4, 6); SWAP(4, 5);
-    SWAP(0, 4); SWAP(0, 3); SWAP(1, 5); SWAP(2, 6);
-    SWAP(2, 5); SWAP(1, 3); SWAP(2, 4); SWAP(2, 3);
-#else
-    SWAP(1, 2); SWAP(0, 2); SWAP(0, 1); SWAP(4, 5);
-    SWAP(3, 5); SWAP(3, 4); SWAP(0, 3); SWAP(1, 4);
-    SWAP(2, 5); SWAP(2, 4); SWAP(1, 3); SWAP(2, 3);
-#endif
-
-#ifdef DEBUG
-    for(unsigned i=0; i<WIDTH-1; i++) {
-//        std::cout << *this << std::endl;
-        assert(moveBuffer[i].move < WIDTH);
-        assert(moveBuffer[i].value >= moves[i+1].value);
-    }
-#endif
-}
 
 Value Connect4::solve(const GameState& state) {
     Value value = alphaBeta(state, VALUE_MIN, VALUE_MAX);
@@ -84,13 +32,6 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     assert(depth < DEPTH_MAX);
     assert(alpha <= beta);
 #endif
-
-    if(state.key() == 6808838541) {
-        std::cout << "Solving..." << std::endl;
-        std::cout << state.print() << std::endl;
-        std::cout << "alpha=" << printValue(alpha) << std::endl;
-        std::cout << "beta=" << printValue(beta) << std::endl;
-    }
 
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
@@ -125,39 +66,18 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             cacheEntry.upper = VALUE_MAX;
         }
 
-        GameState* children = bufferStart;
-        state.children(children);
-        bufferStart += WIDTH;
+        Moves& moves = movePool[moveTop];
+        moveTop++;
 
+        state.children(moves.state);
+        moves.reorder(MOVE_INVALID);
         Value a = alpha;
         Value b = beta;
-        moveOrdering.orderMoves(state, children, bestMove);
-
-
-        if(state.key() == 6808838541) {
-            std::cout << moveOrdering << std::endl;
-        }
-
-        MoveOrdering::Move* moves = moveOrdering.getMoves(depth);
-
-            if(state.key() == 6808838541) {
-                
         for(unsigned i=0; i<WIDTH; i++) {
-            std::cout << "(" << moves[i].move << " " << moves[i].value << ") ";
-        }
-        std::cout << std::endl;
-            }
-
-        for(unsigned i=0; i<WIDTH; i++) {
-            const unsigned move = moves[i].move;
-            const GameState& child = children[move];
-
-            if(state.key() == 6808838541) {
-                std::cout << "Move=" << move << std::endl;
-            }
+            const unsigned move = moves.move[i];
+            const GameState& child = moves.state[i];
 
             if(!child.isValid()) continue;
-
 
             Value childVal;
             if(player == PLAYER_MAX) {
@@ -165,7 +85,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 if(value == VALUE_UNKNOWN || childVal > value) {
                     value = childVal;
                     bestMove = move;
-                    moveOrdering.killerMove[depth] = move;
+//                    moveOrdering.killerMove[depth] = move;
                     a = std::max(a, value);
                 }
             } else {
@@ -173,7 +93,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 if(value == VALUE_UNKNOWN || childVal < value) {
                     value = childVal;
                     bestMove = move;
-                    moveOrdering.killerMove[depth] = move;
+//                    moveOrdering.killerMove[depth] = move;
                     b = std::min(b, value);
                 }
             }
@@ -183,15 +103,6 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 break;
             }
         }
-
-
-        if(state.key() == 6808838541) {
-            std::cout << "Solved..." << std::endl;
-            std::cout << state.print() << std::endl;
-            std::cout << printValue(value) << std::endl;
-            std::cout << (int)bestMove << std::endl;
-        }
-
 
         // Store new bounds to cache
         if(depth <= MAX_CACHE_DEPTH) {
@@ -210,7 +121,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             cacheEntry.depth = depth;
             cache->put(state, cacheEntry);
         }
-        bufferStart -= WIDTH;
+        moveTop--;
         return value;
     }
 }

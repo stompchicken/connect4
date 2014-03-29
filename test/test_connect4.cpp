@@ -73,77 +73,33 @@ TEST_CASE("Connect4::alphaBeta", "[fast]") {
 #if WIDTH == 7
 
 #else
-TEST_CASE("MoveOrdering::orderMoves", "[fast]") {
 
-    MoveOrdering moveOrdering;
+TEST_CASE("Moves::reorder", "[fast]") {
+
+    Moves moves;
     GameState parent = GameState::parse(
         ".|.|.|.|.|.|\n"
         ".|.|.|.|.|.|\n"
         ".|.|.|.|.|.|\n"
         ".|.|.|.|.|.|\n"
-        ".|.|X|.|.|.|\n");
-    GameState children[WIDTH];
-    parent.children(children);
+        ".|.|X|X|.|.|\n");
+    parent.children(moves.state);
 
-    moveOrdering.killerMove[1] = MOVE_INVALID;
-    moveOrdering.orderMoves(parent, children, MOVE_INVALID);
+    moves.reorder(MOVE_INVALID);
+
 
     // 0  1  2  3  4  5
     //{2, 4, 6, 7, 5, 3};
 
-    REQUIRE(moveOrdering.moves[0].move == 3);
-    REQUIRE(moveOrdering.moves[1].move == 2);
-    REQUIRE(moveOrdering.moves[2].move == 4);
-    REQUIRE(moveOrdering.moves[3].move == 1);
-    REQUIRE(moveOrdering.moves[4].move == 5);
-    REQUIRE(moveOrdering.moves[5].move == 0);
+    REQUIRE(moves.move[0] == 3);
+    REQUIRE(moves.move[1] == 2);
+    REQUIRE(moves.move[2] == 4);
+    REQUIRE(moves.move[3] == 1);
+    REQUIRE(moves.move[4] == 5);
+    REQUIRE(moves.move[5] == 0);
 
-    moveOrdering.killerMove[1] = 5;
-    moveOrdering.orderMoves(parent, children, MOVE_INVALID);
-
-    REQUIRE(moveOrdering.moves[0].move == 5);
-    REQUIRE(moveOrdering.moves[1].move == 3);
-    REQUIRE(moveOrdering.moves[2].move == 2);
-    REQUIRE(moveOrdering.moves[3].move == 4);
-    REQUIRE(moveOrdering.moves[4].move == 1);
-    REQUIRE(moveOrdering.moves[5].move == 0);
-
-
-/*
-    moveOrdering.orderMoves(parent, children, MOVE_INVALID);
-    REQUIRE(moves[0].move == 3);
-    REQUIRE(moves[1].move == 2);
-    REQUIRE(moves[2].move == 4);
-    REQUIRE(moves[3].move == 1);
-    REQUIRE(moves[4].move == 5);
-    REQUIRE(moves[5].move == 0);
-
-    moveOrdering.orderMoves(children, MOVE_INVALID, PLAYER_MAX);
-    MoveOrdering::orderMoves(children, MOVE_INVALID, PLAYER_MIN, moves);
-    REQUIRE(moves[0].move == 3);
-    REQUIRE(moves[1].move == 2);
-    REQUIRE(moves[2].move == 4);
-    REQUIRE(moves[3].move == 1);
-    REQUIRE(moves[4].move == 5);
-    REQUIRE(moves[5].move == 0);
-
-    MoveOrdering::orderMoves(children, 4, PLAYER_MAX, moves);
-    REQUIRE(moves[0].move == 4);
-    REQUIRE(moves[1].move == 3);
-    REQUIRE(moves[2].move == 2);
-    REQUIRE(moves[3].move == 1);
-    REQUIRE(moves[4].move == 5);
-    REQUIRE(moves[5].move == 0);
-
-    MoveOrdering::orderMoves(children, 1, PLAYER_MIN, moves);
-    REQUIRE(moves[0].move == 1);
-    REQUIRE(moves[1].move == 3);
-    REQUIRE(moves[2].move == 2);
-    REQUIRE(moves[3].move == 4);
-    REQUIRE(moves[4].move == 5);
-    REQUIRE(moves[5].move == 0);
-*/
 }
+
 #endif
 
 TEST_CASE("Connect4::minimax", "[slow][hide]") {

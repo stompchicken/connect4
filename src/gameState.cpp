@@ -407,3 +407,42 @@ std::string printValue(Value value) {
     else return "VALUE_DRAW";
 
 }
+
+std::ostream& operator<<(std::ostream &output, const Moves &moves) {
+    output << "{ Moves ";
+    for(unsigned i=0; i<WIDTH; i++) {
+        output << "(" << moves.move[i] << ") ";
+    }
+    output << "}";
+    return output;
+}
+
+#define SWAP(x, y) if(value[x] < value[y]) { tempMove = move[y]; tempValue = value[y]; move[y] = move[x]; value[y] = value[x]; move[x] = tempMove; value[x] = tempValue; }
+
+uint8 staticMoveOrder[WIDTH] = {2, 4, 6, 7, 5, 3};
+unsigned Moves::killerMove[DEPTH_MAX] = {0, 0, 0, 0, 0, 0};
+
+
+void Moves::reorder(unsigned /*bestMove*/) {
+    for(unsigned i=0; i<WIDTH; i++) {
+        move[i] = i;
+        value[i] = staticMoveOrder[i];
+
+//        if(i == killerMove[depth]) {
+//            value[i] = 100;
+//        }
+    }
+
+    unsigned tempMove;
+    unsigned tempValue;
+#if WIDTH == 7
+    SWAP(1, 2); SWAP(0, 2); SWAP(0, 1); SWAP(3, 4);
+    SWAP(5, 6); SWAP(3, 5); SWAP(4, 6); SWAP(4, 5);
+    SWAP(0, 4); SWAP(0, 3); SWAP(1, 5); SWAP(2, 6);
+    SWAP(2, 5); SWAP(1, 3); SWAP(2, 4); SWAP(2, 3);
+#else
+    SWAP(1, 2); SWAP(0, 2); SWAP(0, 1); SWAP(4, 5);
+    SWAP(3, 5); SWAP(3, 4); SWAP(0, 3); SWAP(1, 4);
+    SWAP(2, 5); SWAP(2, 4); SWAP(1, 3); SWAP(2, 3);
+#endif
+}

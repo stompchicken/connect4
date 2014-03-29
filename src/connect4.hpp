@@ -55,7 +55,7 @@ class Connect4 {
   public:
     Connect4(long cacheSize) : cache(new Cache(cacheSize)),
                                stats(new Stats()),
-                               bufferStart(buffer) {
+                               moveTop(0) {
     }
 
     ~Connect4() {
@@ -83,11 +83,8 @@ class Connect4 {
     Cache* cache;
     Stats* stats;
 
-    // Pre-allocated state buffer
-    GameState buffer[DEPTH_MAX*WIDTH];
-    GameState* bufferStart;
-
-    MoveOrdering moveOrdering;
+    Moves movePool[DEPTH_MAX];
+    unsigned moveTop;
 
     // Optimal line of play
 

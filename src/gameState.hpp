@@ -193,4 +193,22 @@ class GameState {
     static Hasher hasher;
 };
 
+struct Moves {
+    Moves() {}
+
+    void incrementKiller(unsigned move) {
+        killerMove[move] += 1;
+    }
+
+    void reorder(unsigned bestMove);
+
+    Depth depth;
+    GameState state[WIDTH];
+    unsigned move[WIDTH];
+    unsigned value[WIDTH];
+
+    static unsigned killerMove[DEPTH_MAX];
+
+};
+
 #endif

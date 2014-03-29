@@ -58,16 +58,9 @@ int main(int argc, char* argv[]) {
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(256*MB);
+    Connect4 game(2048*MB);
 
-//    GameState board = GameState::random(depth);
-
-    GameState state = GameState::parse(
-        ".|.|O|X|.|.|\n"
-        ".|.|X|O|O|.|\n"
-        "X|.|O|X|X|.|\n"
-        "O|X|X|O|O|X|\n"
-        "X|O|O|X|X|O|");
+    GameState state = GameState::random(depth);
 
     std::cout << "Solving:" << std::endl;
     std::cout << state.print() << std::endl;
@@ -75,13 +68,13 @@ int main(int argc, char* argv[]) {
     std::cout << "Player=" << printPlayer(state.getPlayer()) << std::endl;
     std::cout << "Key=" << state.key() << std::endl;
 
-//    pthread_t statsThread;
-//    pthread_create(&statsThread, NULL, statsLoop, (void*)&game);
+    pthread_t statsThread;
+    pthread_create(&statsThread, NULL, statsLoop, (void*)&game);
 
     Value value = game.solve(state);
 
     terminate = true;
-//    pthread_join(statsThread, NULL);
+    pthread_join(statsThread, NULL);
 
     std::cout << "Value=" << printValue(value) << std::endl;
 
