@@ -60,14 +60,12 @@ int main(int argc, char* argv[]) {
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(256*MB);
+    Connect4 game(1024*MB);
 
     GameState state = GameState::random(depth);
 
     std::cout << "Solving:" << std::endl;
     std::cout << state.print() << std::endl;
-//    std::cout << "Depth=" << (int)state.getDepth() << std::endl;
-//    std::cout << "Player=" << printPlayer(state.getPlayer()) << std::endl;
 
     pthread_t statsThread;
     pthread_create(&statsThread, NULL, statsLoop, (void*)&game);

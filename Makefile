@@ -2,7 +2,7 @@ INCLUDES=-Isrc -Itest
 OPTFLAGS=-O3 -flto
 
 CFLAGS=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include #-DDEBUG -Wextra -pedantic #-Weverything
-LDFLAGS=$(OPTFLAGS) -lpthread -L/usr/local/opt/ncurses/lib -lncurses
+LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib
 
 SRC=$(wildcard src/*.cpp)
 OBJ=$(patsubst src/%.cpp,build/%.o,$(SRC))
@@ -21,10 +21,10 @@ setup:
 	@mkdir -p bin
 
 bin/connect4: setup $(OBJ)
-	$(CXX) $(LDFLAGS) $(OBJ) -o bin/connect4
+	$(CXX) $(OBJ) -o bin/connect4 $(LDFLAGS)
 
 bin/test: setup $(OBJ) $(TEST_OBJ)
-	$(CXX) $(LDFLAGS) $(TEST_OBJ) -o bin/test
+	$(CXX) $(TEST_OBJ) -o bin/test $(LDFLAGS)
 
 build/%.o: src/%.cpp
 	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
