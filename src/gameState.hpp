@@ -145,10 +145,11 @@ class GameState {
 
   private:
     uint64 p1, p2;
-    Player player;
-    Depth depth;
 
     // Derived fields
+    // These can be inferred from p1 and p2 but are kept explicit for efficiency
+    Player player;
+    Depth depth;
     uint8_t emptyPos[WIDTH];
     uint64 xorHash;
 
@@ -184,7 +185,9 @@ class GameState {
         }
 
         uint64 incHash(uint64 hash, unsigned index, int player_) const {
+            // XOR with the new move
             hash ^= keys[player_ == PLAYER_MAX ? index : index + SIZE];
+            // Flip the player
             hash ^= keys[2*SIZE];
             return hash;
         }
@@ -194,10 +197,16 @@ class GameState {
 };
 
 struct Moves {
-    Moves() {}
+    Moves(int depth_) : depth(depth_) {}
 
-    void incrementKiller(unsigned move) {
-        killerMove[move] += 1;
+    static void updateKiller(Depth depth, unsigned move) {
+        killerMove[depth] = move;
+    }
+
+    static void resetKiller() {
+        for(unsigned i=0; i<DEPTH_MAX; i++) {
+            killerMove[i] = MOVE_INVALID;
+        }
     }
 
     void reorder(unsigned bestMove);

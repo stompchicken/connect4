@@ -154,10 +154,7 @@ uint64 Bitboard::baseBarrier = makeBaseBarrier();
 
 GameState::Hasher GameState::hasher;
 
-GameState::GameState() : p1(0), p2(0), player(PLAYER_MAX), depth(0) {
-    std::fill(emptyPos, emptyPos+WIDTH, 0);
-    xorHash = 0;
-
+GameState::GameState() : p1(0), p2(0), player(PLAYER_MAX), depth(0), emptyPos(), xorHash(0) {
 }
 
 GameState::GameState(uint64 p1_, uint64 p2_, Player player_, Depth depth_) :
@@ -170,10 +167,10 @@ GameState::GameState(const GameState& other) {
     this->p2 = other.p2;
     this->player = other.player;
     this->depth = other.depth;
-    this->xorHash = other.xorHash;
     for(int i=0; i<WIDTH; i++) {
         this->emptyPos[i] = other.emptyPos[i];
     }
+    this->xorHash = other.xorHash;
 }
 
 GameState& GameState::operator=(const GameState& other) {
@@ -420,19 +417,19 @@ std::ostream& operator<<(std::ostream &output, const Moves &moves) {
 #define SWAP(x, y) if(value[x] < value[y]) { tempMove = move[y]; tempValue = value[y]; move[y] = move[x]; value[y] = value[x]; move[x] = tempMove; value[x] = tempValue; }
 
 uint8 staticMoveOrder[WIDTH] = {2, 4, 6, 7, 5, 3};
-unsigned Moves::killerMove[DEPTH_MAX] = {0, 0, 0, 0, 0, 0};
+//uint8 staticMoveOrder[WIDTH] = {7, 6, 5, 4, 3, 2};
+unsigned Moves::killerMove[DEPTH_MAX] = {MOVE_INVALID};
 
-
-void Moves::reorder(unsigned /*bestMove*/) {
+void Moves::reorder(unsigned bestMove) {
     for(unsigned i=0; i<WIDTH; i++) {
         move[i] = i;
         value[i] = staticMoveOrder[i];
 
-//        if(i == killerMove[depth]) {
-//            value[i] = 100;
-//        }
+        if(i == killerMove[depth]) { value[i] = 10; }
+//        if(i == bestMove) { value[i] = 11; }
     }
 
+    // Sorting network
     unsigned tempMove;
     unsigned tempValue;
 #if WIDTH == 7

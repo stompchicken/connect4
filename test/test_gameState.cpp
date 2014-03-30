@@ -277,3 +277,54 @@ TEST_CASE("GameState::evaluate", "[fast]") {
 }
 #endif
 
+
+
+#if WIDTH == 7
+
+#else
+
+TEST_CASE("Moves::reorder", "[fast]") {
+
+    Moves moves(2);
+    Moves::resetKiller();
+    GameState parent = GameState::parse(
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|\n"
+        ".|.|X|X|.|.|\n");
+    parent.children(moves.state);
+    moves.reorder(MOVE_INVALID);
+
+    // 0  1  2  3  4  5
+    //{2, 4, 6, 7, 5, 3}
+
+    REQUIRE(moves.move[0] == 3);
+    REQUIRE(moves.move[1] == 2);
+    REQUIRE(moves.move[2] == 4);
+    REQUIRE(moves.move[3] == 1);
+    REQUIRE(moves.move[4] == 5);
+    REQUIRE(moves.move[5] == 0);
+
+    Moves::updateKiller(2, 4);
+
+    moves.reorder(MOVE_INVALID);
+    REQUIRE(moves.move[0] == 4);
+    REQUIRE(moves.move[1] == 3);
+    REQUIRE(moves.move[2] == 2);
+    REQUIRE(moves.move[3] == 1);
+    REQUIRE(moves.move[4] == 5);
+    REQUIRE(moves.move[5] == 0);
+
+    moves.reorder(1);
+    REQUIRE(moves.move[0] == 1);
+    REQUIRE(moves.move[1] == 4);
+    REQUIRE(moves.move[2] == 3);
+    REQUIRE(moves.move[3] == 2);
+    REQUIRE(moves.move[4] == 5);
+    REQUIRE(moves.move[5] == 0);
+
+}
+
+#endif
+

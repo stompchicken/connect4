@@ -7,12 +7,16 @@ struct Stats {
     Stats() {
         nodesExplored = 0;
         cutoffs = 0;
+        averageCutoff = 0.0;
+        cutoffTotal = 0;
         cacheHits = 0;
         cacheMisses = 0;
     }
 
     long nodesExplored;
     long cutoffs;
+    double averageCutoff;
+    long cutoffTotal;
     long cacheHits;
     long cacheMisses;
 };
@@ -54,8 +58,7 @@ std::ostream& operator<<(std::ostream &output, const MoveOrdering &moveOrdering)
 class Connect4 {
   public:
     Connect4(long cacheSize) : cache(new Cache(cacheSize)),
-                               stats(new Stats()),
-                               moveTop(0) {
+                               stats(new Stats()) {
     }
 
     ~Connect4() {
@@ -82,12 +85,6 @@ class Connect4 {
   private:
     Cache* cache;
     Stats* stats;
-
-    Moves movePool[DEPTH_MAX];
-    unsigned moveTop;
-
-    // Optimal line of play
-
 
     // No copying allowed
     Connect4(const Connect4& other);

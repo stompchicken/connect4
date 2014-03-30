@@ -70,38 +70,6 @@ TEST_CASE("Connect4::alphaBeta", "[fast]") {
 }
 #endif
 
-#if WIDTH == 7
-
-#else
-
-TEST_CASE("Moves::reorder", "[fast]") {
-
-    Moves moves;
-    GameState parent = GameState::parse(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|X|X|.|.|\n");
-    parent.children(moves.state);
-
-    moves.reorder(MOVE_INVALID);
-
-
-    // 0  1  2  3  4  5
-    //{2, 4, 6, 7, 5, 3};
-
-    REQUIRE(moves.move[0] == 3);
-    REQUIRE(moves.move[1] == 2);
-    REQUIRE(moves.move[2] == 4);
-    REQUIRE(moves.move[3] == 1);
-    REQUIRE(moves.move[4] == 5);
-    REQUIRE(moves.move[5] == 0);
-
-}
-
-#endif
-
 TEST_CASE("Connect4::minimax", "[slow][hide]") {
     for(int i=0; i<1000; i++) {
         Connect4 game(64*1024*1024);

@@ -16,6 +16,8 @@ void printStats(const Connect4& game, double duration) {
     printw("Duration: %.2f\n\n", duration);
     printw("%e nodes explored\n", (double)stats.nodesExplored);
     printw("%e nodes explored/s\n", (double)stats.nodesExplored/duration);
+    printw("%e cutoffs\n", (double)stats.cutoffs);
+    printw("%f average cutoff index\n", (double)stats.averageCutoff);
 
     printw("\nCache statistics:\n");
     double hitRate = float(stats.cacheHits*100)/float(stats.cacheHits+stats.cacheMisses);
@@ -58,15 +60,14 @@ int main(int argc, char* argv[]) {
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(2048*MB);
+    Connect4 game(256*MB);
 
     GameState state = GameState::random(depth);
 
     std::cout << "Solving:" << std::endl;
     std::cout << state.print() << std::endl;
-    std::cout << "Depth=" << (int)state.getDepth() << std::endl;
-    std::cout << "Player=" << printPlayer(state.getPlayer()) << std::endl;
-    std::cout << "Key=" << state.key() << std::endl;
+//    std::cout << "Depth=" << (int)state.getDepth() << std::endl;
+//    std::cout << "Player=" << printPlayer(state.getPlayer()) << std::endl;
 
     pthread_t statsThread;
     pthread_create(&statsThread, NULL, statsLoop, (void*)&game);
@@ -77,21 +78,19 @@ int main(int argc, char* argv[]) {
     pthread_join(statsThread, NULL);
 
     std::cout << "Value=" << printValue(value) << std::endl;
-
-
-//    game.resetStats();
 /*
-    game.clearCacheValues();
-    std::cout << "Clearing cache" << std::endl;
-    std::cout << board.print() << std::endl;
-    start = std::clock();
-    value = game.alphaBeta(board, VALUE_MIN, VALUE_MAX);
-    end = std::clock();
-    std::cout << "Duration: " << (end - start) / (double) CLOCKS_PER_SEC << std::endl;
-    std::cout << game.getStats();
-    game.printCacheStats();
+    {
+        // Recalculate
+        game.resetStats();
+        game.clearCacheValues();
+        terminate=false;
+        pthread_t statsThread;
+        pthread_create(&statsThread, NULL, statsLoop, (void*)&game);
+        Value value = game.solve(state);
+        terminate = true;
+        pthread_join(statsThread, NULL);
+        std::cout << "Value=" << printValue(value) << std::endl;
+    }
 */
-
-
     return 0;
 }

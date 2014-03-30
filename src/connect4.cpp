@@ -5,18 +5,8 @@
 
 #define MAX_CACHE_DEPTH WIDTH*HEIGHT - 6
 
-std::ostream& operator<<(std::ostream &output, const Stats &stats) {
-    output << static_cast<float>(stats.nodesExplored) << " nodes explored" << std::endl;
-    output << static_cast<float>(stats.cutoffs) << " cutoffs" << std::endl;
-
-    float hitRate = float(stats.cacheHits)/float(stats.cacheHits+stats.cacheMisses);
-    output << hitRate << " cache hitrate" << std::endl;
-
-    return output;
-}
-
-
 Value Connect4::solve(const GameState& state) {
+    Moves::resetKiller();
     Value value = alphaBeta(state, VALUE_MIN, VALUE_MAX);
     return value;
 }
@@ -55,27 +45,23 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             alpha = std::max(alpha, cacheEntry.lower);
             beta = std::min(beta, cacheEntry.upper);
 
-/*
             if(cacheEntry.bestMove != MOVE_INVALID) {
                 bestMove = cacheEntry.bestMove;
             }
-*/
         } else {
             stats->cacheMisses++;
             cacheEntry.lower = VALUE_MIN;
             cacheEntry.upper = VALUE_MAX;
         }
 
-        Moves& moves = movePool[moveTop];
-        moveTop++;
-
+        Moves moves(depth+1);
         state.children(moves.state);
         moves.reorder(MOVE_INVALID);
         Value a = alpha;
         Value b = beta;
         for(unsigned i=0; i<WIDTH; i++) {
             const unsigned move = moves.move[i];
-            const GameState& child = moves.state[i];
+            const GameState& child = moves.state[move];
 
             if(!child.isValid()) continue;
 
@@ -85,7 +71,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 if(value == VALUE_UNKNOWN || childVal > value) {
                     value = childVal;
                     bestMove = move;
-//                    moveOrdering.killerMove[depth] = move;
+                    Moves::updateKiller(depth+1, bestMove);
                     a = std::max(a, value);
                 }
             } else {
@@ -93,13 +79,15 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 if(value == VALUE_UNKNOWN || childVal < value) {
                     value = childVal;
                     bestMove = move;
-//                    moveOrdering.killerMove[depth] = move;
+                    Moves::updateKiller(depth+1, bestMove);
                     b = std::min(b, value);
                 }
             }
 
             if(a >= b) {
                 stats->cutoffs++;
+                stats->cutoffTotal++;
+                stats->averageCutoff += (i - stats->averageCutoff) / stats->cutoffTotal;
                 break;
             }
         }
@@ -121,7 +109,6 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             cacheEntry.depth = depth;
             cache->put(state, cacheEntry);
         }
-        moveTop--;
         return value;
     }
 }
