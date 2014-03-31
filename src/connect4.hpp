@@ -23,42 +23,11 @@ struct Stats {
 
 std::ostream& operator<<(std::ostream &output, const Stats &stats);
 
-class MoveOrdering {
-  public:
-    MoveOrdering() {
-        for(int depth=0; depth<DEPTH_MAX; depth++) {
-            killerMove[depth] = MOVE_INVALID;
-
-            for(unsigned i=0; i<WIDTH; i++) {
-                moves[depth*i].move = 0;
-                moves[depth*i].value = 0;
-            }
-
-        }
-    }
-
-    // Move ordering
-    struct Move {
-        unsigned move;
-        unsigned value;
-    };
-
-    void orderMoves(const GameState& parent, GameState* children, unsigned bestMove);
-    Move* getMoves(Depth depth) { return moves + (depth * WIDTH); }
-
-
-    Move moves[WIDTH*DEPTH_MAX];
-    unsigned killerMove[DEPTH_MAX];
-
-};
-
-std::ostream& operator<<(std::ostream &output, const MoveOrdering &moveOrdering);
-
-
 class Connect4 {
   public:
     Connect4(long cacheSize) : cache(new Cache(cacheSize)),
-                               stats(new Stats()) {
+                               stats(new Stats()),
+                               movePoolHead(0) {
     }
 
     ~Connect4() {
@@ -85,6 +54,9 @@ class Connect4 {
   private:
     Cache* cache;
     Stats* stats;
+
+    Moves movePool[DEPTH_MAX];
+    unsigned movePoolHead;
 
     // No copying allowed
     Connect4(const Connect4& other);

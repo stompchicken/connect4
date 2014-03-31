@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
 
-    Connect4 game(1024*MB);
+    Connect4 game(32*MB);
 
     GameState state = GameState::random(depth);
 

@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-#define MAX_CACHE_DEPTH WIDTH*HEIGHT - 6
+#define MAX_CACHE_DEPTH WIDTH*HEIGHT - 2
 
 Value Connect4::solve(const GameState& state) {
     Moves::resetKiller();
@@ -54,7 +54,9 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             cacheEntry.upper = VALUE_MAX;
         }
 
-        Moves moves(depth+1);
+        Moves& moves = movePool[movePoolHead];
+        movePoolHead++;
+        moves.depth = depth+1;
         state.children(moves.state);
         moves.reorder(MOVE_INVALID);
         Value a = alpha;
@@ -109,6 +111,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             cacheEntry.depth = depth;
             cache->put(state, cacheEntry);
         }
+        movePoolHead--;
         return value;
     }
 }

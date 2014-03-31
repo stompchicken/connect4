@@ -197,7 +197,7 @@ class GameState {
 };
 
 struct Moves {
-    Moves(int depth_) : depth(depth_) {}
+    Moves() {}
 
     static void updateKiller(Depth depth, unsigned move) {
         killerMove[depth] = move;

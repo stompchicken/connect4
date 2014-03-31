@@ -285,7 +285,8 @@ TEST_CASE("GameState::evaluate", "[fast]") {
 
 TEST_CASE("Moves::reorder", "[fast]") {
 
-    Moves moves(2);
+    Moves moves;
+    moves.depth = 2;
     Moves::resetKiller();
     GameState parent = GameState::parse(
         ".|.|.|.|.|.|\n"
