@@ -1,5 +1,5 @@
 INCLUDES=-Isrc -Itest
-OPTFLAGS=-Ofast -flto
+OPTFLAGS=-O3
 
 CFLAGS=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include #-DDEBUG -Wextra -pedantic #-Weverything
 LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib
