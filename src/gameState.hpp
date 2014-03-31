@@ -154,10 +154,13 @@ class GameState {
     uint64 xorHash;
 
     void generateDerivedFields();
+
+    // Add a piece in the row and column
     void makeMove(unsigned row, unsigned col);
 
     // Internal hashing class
-    // Partly to solve the problem of static initialisation of the keys
+    // Partly to solve the problem of static initialisation of the
+    // keys. Uses Zobrist hashing.
     struct Hasher {
         uint64 keys[(2*SIZE)+1];
 
@@ -196,6 +199,9 @@ class GameState {
     static Hasher hasher;
 };
 
+/*
+ Move ordering structure
+ */
 struct Moves {
     Moves() {}
 
@@ -209,6 +215,7 @@ struct Moves {
         }
     }
 
+    // Reorder the move/value arrays to be in decreasing value order
     void reorder(unsigned bestMove);
 
     Depth depth;
@@ -216,6 +223,7 @@ struct Moves {
     unsigned move[WIDTH];
     unsigned value[WIDTH];
 
+    // Last move that caused a cutoff at each depth
     static unsigned killerMove[DEPTH_MAX];
 
 };
