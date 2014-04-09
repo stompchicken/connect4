@@ -33,5 +33,5 @@ build/%.o: test/%.cpp
 	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
 
 clean:
-	@rm -rf bin/*
-	@rm -rf build/*
+	@rm -rf bin
+	@rm -rf build

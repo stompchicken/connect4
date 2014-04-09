@@ -55,6 +55,11 @@ Cache::~Cache() {
     delete [] this->hashtable;
 }
 
+void Cache::prefetch(const GameState& state) const {
+    uint64_t index = state.hash() % this->capacity;
+    __builtin_prefetch(&hashtable[index]);
+}
+
 bool Cache::get(const GameState& state, Entry& entry) const {
     uint64_t startIndex = state.hash() % this->capacity;
     uint64_t index;

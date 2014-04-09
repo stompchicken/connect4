@@ -34,6 +34,7 @@ class Cache {
   public:
     Cache(uint64_t capacity);
     virtual ~Cache();
+    void prefetch(const GameState& state) const;
     bool get(const GameState& state, Entry& value) const;
     bool put(const GameState& state, const Entry& value);
     void clear();

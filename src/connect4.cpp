@@ -23,6 +23,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     assert(alpha <= beta);
 #endif
 
+    cache->prefetch(state);
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
         // Don't bother caching, evaluate is fast
