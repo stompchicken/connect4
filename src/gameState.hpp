@@ -199,33 +199,5 @@ class GameState {
     static Hasher hasher;
 };
 
-/*
- Move ordering structure
- */
-struct Moves {
-    Moves() {}
-
-    static void updateKiller(Depth depth, unsigned move) {
-        killerMove[depth] = move;
-    }
-
-    static void resetKiller() {
-        for(unsigned i=0; i<DEPTH_MAX; i++) {
-            killerMove[i] = MOVE_INVALID;
-        }
-    }
-
-    // Reorder the move/value arrays to be in decreasing value order
-    void reorder(unsigned bestMove);
-
-    Depth depth;
-    GameState state[WIDTH];
-    unsigned move[WIDTH];
-    unsigned value[WIDTH];
-
-    // Last move that caused a cutoff at each depth
-    static unsigned killerMove[DEPTH_MAX];
-
-};
 
 #endif

@@ -1,5 +1,8 @@
 #include "gameState.hpp"
 #include "cache.hpp"
+#include "moveOrder.hpp"
+
+#include "pool.hpp"
 
 #include <ctime>
 
@@ -27,7 +30,7 @@ class Connect4 {
   public:
     Connect4(long cacheSize) : cache(new Cache(cacheSize)),
                                stats(new Stats()),
-                               movePoolHead(0) {
+                               statePool(DEPTH_MAX) {
     }
 
     ~Connect4() {
@@ -55,8 +58,9 @@ class Connect4 {
     Cache* cache;
     Stats* stats;
 
-    Moves movePool[DEPTH_MAX];
-    unsigned movePoolHead;
+    Pool<GameState[WIDTH]> statePool;
+
+    MoveOrder moveOrder;
 
     // No copying allowed
     Connect4(const Connect4& other);

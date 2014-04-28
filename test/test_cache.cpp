@@ -67,5 +67,5 @@ TEST_CASE("Cache::randomAccess", "[fast]") {
         Entry val2;
         REQUIRE(cache.get(state, val2) == true);
         REQUIRE(val1 == val2);
-        }
+    }
 }

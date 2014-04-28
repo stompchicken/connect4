@@ -1,12 +1,12 @@
 #include "connect4.hpp"
-#include <algorithm>
 
+#include <algorithm>
 #include <math.h>
 
 #define MAX_CACHE_DEPTH WIDTH*HEIGHT - 2
 
 Value Connect4::solve(const GameState& state) {
-    Moves::resetKiller();
+    moveOrder.reset();
     Value value = alphaBeta(state, VALUE_MIN, VALUE_MAX);
     return value;
 }
@@ -55,16 +55,17 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             cacheEntry.upper = VALUE_MAX;
         }
 
-        Moves& moves = movePool[movePoolHead];
-        movePoolHead++;
-        moves.depth = depth+1;
-        state.children(moves.state);
-        moves.reorder(MOVE_INVALID);
+        unsigned moves[WIDTH];
+        GameState children[WIDTH];
+
+        moveOrder.reorder(depth+1, MOVE_INVALID, moves);
+        state.children(children);
+
         Value a = alpha;
         Value b = beta;
         for(unsigned i=0; i<WIDTH; i++) {
-            const unsigned move = moves.move[i];
-            const GameState& child = moves.state[move];
+            const unsigned move = moves[i];
+            const GameState& child = children[move];
 
             if(!child.isValid()) continue;
 
@@ -74,7 +75,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 if(value == VALUE_UNKNOWN || childVal > value) {
                     value = childVal;
                     bestMove = move;
-                    Moves::updateKiller(depth+1, bestMove);
+                    moveOrder.cutoff(depth+1, bestMove);
                     a = std::max(a, value);
                 }
             } else {
@@ -82,7 +83,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
                 if(value == VALUE_UNKNOWN || childVal < value) {
                     value = childVal;
                     bestMove = move;
-                    Moves::updateKiller(depth+1, bestMove);
+                    moveOrder.cutoff(depth+1, bestMove);
                     b = std::min(b, value);
                 }
             }
@@ -112,7 +113,6 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             cacheEntry.depth = depth;
             cache->put(state, cacheEntry);
         }
-        movePoolHead--;
         return value;
     }
 }
