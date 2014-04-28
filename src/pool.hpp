@@ -14,8 +14,9 @@ class Pool {
     }
 
     T& get() {
-        
-        return pool[(index+1];
+        T& ret = pool[index++];
+        if(index == size) index = 0;
+        return ret;
     }
 
   private:
