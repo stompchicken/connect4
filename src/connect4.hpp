@@ -30,7 +30,7 @@ class Connect4 {
   public:
     Connect4(long cacheSize) : cache(new Cache(cacheSize)),
                                stats(new Stats()),
-                               statePool(DEPTH_MAX) {
+                               statePool(WIDTH*DEPTH_MAX) {
     }
 
     ~Connect4() {
@@ -58,7 +58,7 @@ class Connect4 {
     Cache* cache;
     Stats* stats;
 
-    Pool<GameState[WIDTH]> statePool;
+    Pool<GameState> statePool;
 
     MoveOrder moveOrder;
 

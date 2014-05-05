@@ -23,7 +23,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     assert(alpha <= beta);
 #endif
 
-    cache->prefetch(state);
+//    cache->prefetch(state);
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
         // Don't bother caching, evaluate is fast
@@ -56,16 +56,16 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
         }
 
         unsigned moves[WIDTH];
-        GameState children[WIDTH];
+        PoolEntry<GameState> children = statePool.get(WIDTH);
 
         moveOrder.reorder(depth+1, MOVE_INVALID, moves);
-        state.children(children);
+        state.children(children.data);
 
         Value a = alpha;
         Value b = beta;
         for(unsigned i=0; i<WIDTH; i++) {
             const unsigned move = moves[i];
-            const GameState& child = children[move];
+            const GameState& child = children.data[move];
 
             if(!child.isValid()) continue;
 

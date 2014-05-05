@@ -154,7 +154,7 @@ uint64 Bitboard::baseBarrier = makeBaseBarrier();
 
 GameState::Hasher GameState::hasher;
 
-GameState::GameState() : p1(0), p2(0), player(PLAYER_MAX), depth(0), emptyPos(), xorHash(0) {
+GameState::GameState() : p1(0), p2(0), xorHash(0), player(PLAYER_MAX), depth(0), emptyPos() {
 }
 
 GameState::GameState(uint64 p1_, uint64 p2_, Player player_, Depth depth_) :
@@ -381,7 +381,7 @@ uint64 flipLeftRight(uint64 x) {
     return output;
 }
 
-int flipPlayer(Player player) {
+Player flipPlayer(Player player) {
     return player == PLAYER_MAX ? PLAYER_MIN : PLAYER_MAX;
 }
 

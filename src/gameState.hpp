@@ -14,7 +14,7 @@ typedef uint64_t uint64;
 typedef uint32_t uint32;
 typedef uint8_t uint8;
 
-typedef int Player;
+typedef uint8 Player;
 const static Player PLAYER_INVALID = 0;
 const static Player PLAYER_MAX = 1;
 const static Player PLAYER_MIN = 2;
@@ -148,10 +148,10 @@ class GameState {
 
     // Derived fields
     // These can be inferred from p1 and p2 but are kept explicit for efficiency
+    uint64 xorHash;
     Player player;
     Depth depth;
-    uint8_t emptyPos[WIDTH];
-    uint64 xorHash;
+    uint8 emptyPos[WIDTH];
 
     void generateDerivedFields();
 
