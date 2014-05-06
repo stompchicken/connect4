@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream &output, const Entry &val);
 
 class Cache {
   public:
-    Cache(uint64_t capacity);
+    Cache(uint64 capacity);
     virtual ~Cache();
     void prefetch(const GameState& state) const;
     bool get(const GameState& state, Entry& value) const;
@@ -45,18 +45,18 @@ class Cache {
 
   private:
     // Number of entries in the hashtable
-    const uint64_t capacity;
+    const uint64 capacity;
     // Count of entries
-    uint64_t size;
+    uint64 size;
     // Contains key, value pairs
-    uint64_t* hashtable;
+    uint64* hashtable;
 
     // Keep counts of how many states of each depth are in the cache
-    mutable int counts[DEPTH_MAX];
+    mutable uint64 counts[DEPTH_MAX];
 
     // Size of the linear probing before returning failure
     // (The size of a cache line in modern Intel chips is 64 bytes)
-    const static uint64_t probe = 8;
+    const static uint64 probe = 8;
 
     // No copying
     Cache(const Cache& other);

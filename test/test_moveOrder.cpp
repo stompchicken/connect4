@@ -8,7 +8,6 @@
 TEST_CASE("Moves::reorder", "[fast]") {
 
     MoveOrder moveOrder;
-
     GameState parent = GameState::parse(
         ".|.|.|.|.|.|\n"
         ".|.|.|.|.|.|\n"
@@ -18,6 +17,8 @@ TEST_CASE("Moves::reorder", "[fast]") {
 
     unsigned moves[WIDTH];
     GameState children[WIDTH];
+    Depth depth = parent.getDepth();
+
 
     moveOrder.reorder(1, MOVE_INVALID, moves);
     parent.children(children);
@@ -32,9 +33,9 @@ TEST_CASE("Moves::reorder", "[fast]") {
     REQUIRE(moves[4] == 5);
     REQUIRE(moves[5] == 0);
 
-    moveOrder.cutoff(2, 4);
+    moveOrder.cutoff(depth, 4);
 
-    moveOrder.reorder(2, MOVE_INVALID, moves);
+    moveOrder.reorder(depth, MOVE_INVALID, moves);
     REQUIRE(moves[0] == 4);
     REQUIRE(moves[1] == 3);
     REQUIRE(moves[2] == 2);
@@ -42,7 +43,7 @@ TEST_CASE("Moves::reorder", "[fast]") {
     REQUIRE(moves[4] == 5);
     REQUIRE(moves[5] == 0);
 
-    moveOrder.reorder(2, 1, moves);
+    moveOrder.reorder(depth, 1, moves);
     REQUIRE(moves[0] == 1);
     REQUIRE(moves[1] == 4);
     REQUIRE(moves[2] == 3);

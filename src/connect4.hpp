@@ -16,12 +16,12 @@ struct Stats {
         cacheMisses = 0;
     }
 
-    long nodesExplored;
-    long cutoffs;
+    uint64 nodesExplored;
+    uint64 cutoffs;
     double averageCutoff;
-    long cutoffTotal;
-    long cacheHits;
-    long cacheMisses;
+    uint64 cutoffTotal;
+    uint64 cacheHits;
+    uint64 cacheMisses;
 };
 
 std::ostream& operator<<(std::ostream &output, const Stats &stats);
@@ -30,7 +30,7 @@ class Connect4 {
   public:
     Connect4(long cacheSize) : cache(new Cache(cacheSize)),
                                stats(new Stats()),
-                               statePool(WIDTH*DEPTH_MAX) {
+                               statePool(WIDTH*(DEPTH_MAX+1)) {
     }
 
     ~Connect4() {

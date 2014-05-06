@@ -4,7 +4,6 @@
 
 uint8 staticMoveOrder[WIDTH] = {2, 4, 6, 7, 5, 3};
 
-
 void MoveOrder::reorder(Depth depth, unsigned cachedMove, unsigned moves[WIDTH]) {
     uint64 value[WIDTH];
     for(unsigned i=0; i<WIDTH; i++) {
@@ -12,6 +11,7 @@ void MoveOrder::reorder(Depth depth, unsigned cachedMove, unsigned moves[WIDTH])
         value[i] = staticMoveOrder[i];
 
         if(i == killerMove[depth]) { value[i] = 10; }
+
         if(i == cachedMove) { value[i] = 11; }
     }
 

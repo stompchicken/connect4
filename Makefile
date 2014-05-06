@@ -1,5 +1,6 @@
 INCLUDES=-Isrc -Itest
-OPTFLAGS=-O3
+OPTFLAGS=-O3 -ftree-vectorize -msse2 -funroll-loops
+#OPTFLAGS=-g -O2
 
 CFLAGS=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include #-DDEBUG -Wextra -pedantic #-Weverything
 LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib

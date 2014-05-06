@@ -248,14 +248,14 @@ void GameState::children(GameState* buffer) const {
 }
 
 Value GameState::evaluate() const {
+    if((p1|p2) == Bitboard::zeroBarrier) {
+        return VALUE_DRAW;
+    }
+
     if(Bitboard::line4(p1) > 0) {
         return VALUE_MAX;
     } else if(Bitboard::line4(p2) > 0) {
         return VALUE_MIN;
-    }
-
-    if((p1|p2) == Bitboard::zeroBarrier) {
-        return VALUE_DRAW;
     }
 
     return VALUE_UNKNOWN;
