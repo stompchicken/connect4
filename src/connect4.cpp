@@ -1,6 +1,5 @@
 #include "connect4.hpp"
 
-#include <algorithm>
 #include <math.h>
 
 #define MAX_CACHE_DEPTH WIDTH*HEIGHT - 4

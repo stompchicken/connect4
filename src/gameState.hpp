@@ -7,12 +7,10 @@
 #include <cstdlib>
 #include <cassert>
 
-
 Player flipPlayer(Player player);
 std::string printPlayer(Player player);
 Value flipValue(Value value);
 std::string printValue(Value value);
-
 
 /*
 
@@ -50,7 +48,7 @@ class Bitboard {
         return (uint64)1 << toIndex(row, col);
     }
 
-    static uint64 parse(std::string board, char piece = 'X');
+    static uint64 parse(const std::string board&, char piece = 'X');
     static std::string print(uint64 board);
 
     static uint64 line4(uint64);
@@ -79,10 +77,10 @@ class Bitboard {
     static uint64 baseBarrier; // Has a bit set in the bottom row
 };
 
-uint64 makeZeroBarrier();
-uint64 makeBaseBarrier();
 
-
+/*
+ * Conect four board state
+ */
 class GameState {
 
   public:
@@ -97,20 +95,25 @@ class GameState {
 
     friend std::ostream& operator<<(std::ostream& os, const GameState& board);
 
+    // Generate a random state by playing n random moves
     static GameState random(Depth depth=16);
-    static GameState parse(std::string text);
+    static GameState parse(const std::string& text);
 
+    // Incremetal Zobrist hash
     inline uint64 hash() const { return xorHash; }
     inline uint64 key() const {  return p1 | ((p1 | p2) + Bitboard::baseBarrier); }
 
+    inline bool isValid() const { return player != PLAYER_INVALID; }
+
     inline Player getPlayer() const { return player; }
     inline void setPlayer(Player p) { this->player = p; }
-    inline bool isValid() const { return player != PLAYER_INVALID; }
 
     inline Depth getDepth() const { return depth; }
     inline void setDepth(Depth d) { this->depth = d; }
 
+    // Generate all children nodes, takes a pre-allocated buffer
     void children(GameState* buffer) const;
+    // Test for win or draw conditions
     Value evaluate() const;
     uint8 heuristic() const;
 
@@ -122,6 +125,7 @@ class GameState {
 
 
   private:
+    // Bitboards for player 1 (MAX) and player 2 (MIN)
     uint64 p1, p2;
 
     // Derived fields
@@ -133,7 +137,7 @@ class GameState {
 
     void generateDerivedFields();
 
-    // Add a piece in the row and column
+    // Add a piece in the row and column and update derived fields
     void makeMove(unsigned row, unsigned col);
 
     // Internal hashing class

@@ -3,17 +3,11 @@
 
 #include "gameState.hpp"
 
-/*
- Closed addressing hash table with 64-bit entries and linear probing
- Key/value pairs are packed into 64-bits
- Key/value replacement is done by replacing deeper states with
- shallower ones, on the assumption that they are more expensive to compute
- */
-
 typedef uint32 Hash;
 typedef uint64 Key;
 typedef uint64 Packed;
 
+// Key/value entry that is packed into 64 bits
 struct Entry {
     // Lower bound on value of state
     Value lower;
@@ -30,10 +24,17 @@ void unpackEntry(const Packed& value, Key& key, Entry& entry);
 bool operator==(const Entry& lhs, const Entry& rhs);
 std::ostream& operator<<(std::ostream &output, const Entry &val);
 
+/*
+ Closed addressing hash table with 64-bit entries and linear probing
+ Key/value pairs are packed into 64-bits
+ Key/value replacement is done by replacing deeper states with
+ shallower ones, on the assumption that they are more expensive to compute
+ */
 class Cache {
   public:
     Cache(uint64 capacity);
     virtual ~Cache();
+    // Use prefetch intrinsics to reduce latency of get calls
     void prefetch(const GameState& state) const;
     bool get(const GameState& state, Entry& value) const;
     bool put(const GameState& state, const Entry& value);

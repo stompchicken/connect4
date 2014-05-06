@@ -42,6 +42,8 @@ class Connect4 {
 
     // Alpha-beta with caching
     Value alphaBeta(const GameState& board, Value alpha, Value beta);
+
+    // Return the moves contained in the optimal strategy
     void principleVariation(const GameState& board, unsigned* moves);
 
 

@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <cassert>
 
-uint64 Bitboard::parse(std::string text, char piece) {
+uint64 Bitboard::parse(const std::string& text, char piece) {
     uint64 mask;
     unsigned col = 0;
     unsigned row = HEIGHT - 1;
@@ -202,7 +202,7 @@ GameState GameState::random(Depth moves) {
     return board;
 }
 
-GameState GameState::parse(std::string text) {
+GameState GameState::parse(const std::string& text) {
     GameState state;
     state.p1 = Bitboard::parse(text, 'X');
     state.p2 = Bitboard::parse(text, 'O');

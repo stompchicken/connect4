@@ -3,11 +3,15 @@
 
 #include <cassert>
 
+/*
+ * RAII style class for an array of objects drawn from a pool
+ */
 template<typename T>
 class PoolEntry {
 
   public:
-    PoolEntry(T* data_, size_t size_, size_t& index_) : data(data_), size(size_), index(index_) {
+    PoolEntry(T* data_, size_t size_, size_t& index_) :
+        data(data_), size(size_), index(index_) {
         index+=size;
     }
 
@@ -20,15 +24,16 @@ class PoolEntry {
 
   private:
     size_t& index;
-
 };
 
+/*
+ * Simple memory pool
+ */
 template<typename T>
 class Pool {
 
   public:
     Pool(size_t capacity_) : capacity(capacity_), index(0), pool(new T[capacity]) {
-
     }
 
     ~Pool() {
@@ -41,10 +46,12 @@ class Pool {
     }
 
   private:
+    // Total size of the pool
     size_t capacity;
+    // Current 'head' of the pool
     size_t index;
+    // Array of objects
     T* pool;
-
 };
 
 

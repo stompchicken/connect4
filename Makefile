@@ -1,8 +1,8 @@
 INCLUDES=-Isrc -Itest
-OPTFLAGS=-O3 -ftree-vectorize -msse2 -funroll-loops
-#OPTFLAGS=-g -O2
+#OPTFLAGS=-O3 -ftree-vectorize -msse2 -funroll-loops
+OPTFLAGS=-g
 
-CFLAGS=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include #-DDEBUG -Wextra -pedantic #-Weverything
+CFLAGS=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include -DDEBUG -Wextra -pedantic #-Weverything
 LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib
 
 SRC=$(wildcard src/*.cpp)

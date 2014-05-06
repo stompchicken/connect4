@@ -54,41 +54,31 @@ void* statsLoop(void *arg){
 
 int main(int argc, char* argv[]) {
 
-    if(argc != 2) {
-        std::cerr << "Usage: noob [startDepth]" << std::endl;
+    if(argc != 3) {
+        std::cerr << "Usage: connect4 [startDepth] [cacheSize(MB)]" << std::endl;
         exit(-1);
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
+    size_t cacheSize = static_cast<size_t>(std::atoi(argv[2])) * MB;
 
-    Connect4 game(4096*MB);
-
+    Connect4 game(cacheSize);
     GameState state = GameState::random(depth);
 
     std::cout << "Solving:" << std::endl;
     std::cout << state.print() << std::endl;
 
+    // Kick off a stats reporting thread
     pthread_t statsThread;
     pthread_create(&statsThread, NULL, statsLoop, (void*)&game);
 
+    // Solve the game
     Value value = game.solve(state);
 
+    // Terminate stats thread
     terminate = true;
     pthread_join(statsThread, NULL);
 
     std::cout << "Value=" << printValue(value) << std::endl;
-/*
-    {
-        // Recalculate
-        game.resetStats();
-        game.clearCacheValues();
-        terminate=false;
-        pthread_t statsThread;
-        pthread_create(&statsThread, NULL, statsLoop, (void*)&game);
-        Value value = game.solve(state);
-        terminate = true;
-        pthread_join(statsThread, NULL);
-        std::cout << "Value=" << printValue(value) << std::endl;
-    }
-*/
+
     return 0;
 }

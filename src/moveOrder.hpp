@@ -4,6 +4,9 @@
 #include "common.hpp"
 #include "gameState.hpp"
 
+/*
+ * Reorders children nodes
+ */
 class MoveOrder {
 
   public:
