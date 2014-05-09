@@ -2,7 +2,12 @@
 The problem
 ===========
 
-Solve connect 4 exactly, on my Macbook Air in no less than eight hours. It's a win for white. This is well known.
+The challenge we have before us is this:
+
+> Solve Connect Four, exactly, on a 2012 Macbook Air in no less than eight hours.
+
+Connect Four is a [solved game](http://en.wikipedia.org/wiki/Connect_Four#Mathematical_solution), it was solved independently by James Dow Allen and Victor Allis in the late 80s.
+It's a win for white. This is well known.
 
 Minimax
 -------
