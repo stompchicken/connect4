@@ -6,7 +6,16 @@ The challenge we have before us is this:
 
 > Solve Connect Four, exactly, on a 2012 Macbook Air in no less than eight hours.
 
-Connect Four is a [solved game](http://en.wikipedia.org/wiki/Connect_Four#Mathematical_solution), it was solved independently by James Dow Allen and Victor Allis in the late 80s.
+Connect Four is a [solved game](http://en.wikipedia.org/wiki/Connect_Four#Mathematical_solution).
+It was solved independently by James Dow Allen and Victor Allis in the
+late 80s.
+
+Fhourstones
+
+* It's interesting to do something even if someone has done it before
+* It's better tested and better explained
+* I learned a lot about performance tuning algon the way.
+
 It's a win for white. This is well known.
 
 Minimax
@@ -130,7 +139,11 @@ Here's an example board encoding:
         b1 = 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
         b2 = 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000 0000
 
-One advantage of a bitboard is it's very compact so allocation and copying of states is going to be cheap. The other big advatage is that testing whether a state is terminal can be implemented very efficiently with a handful of bitwise operations. To see this first think about a bitboard `b` and the expression `(b << 2) & b`
+One advantage of a bitboard is it's very compact so allocation and
+copying of states is going to be cheap. The other big advatage is that
+testing whether a state is terminal can be implemented very
+efficiently with a handful of bitwise operations. To see this first
+think about a bitboard `b` and the expression `(b << 2) & b`
 
         |.|.|.|.|.|.|.|     |.|.|X|.|X|.|.|     |.|.|.|.|.|.|.|
         |.|.|.|.|.|.|.|     |.|.|X|X|.|.|.|     |.|.|.|.|.|.|.|
@@ -163,9 +176,14 @@ We also need to check for a draw, which is just a bitwise OR of the
 two bitboards and a comparison against a full bitboard.
 
 Column order to keep track of height for each column, for quicker
-move()
+move(). Probably could be quicker still (why it's column major)
 
 (Benchmark results)
+
+Summary:
+ * 64-bit bitboards, state is 21 bytes
+ * Testing for terminal states in ~20ns
+ * Making new states in ~20ns
 
 Caching states
 --------------
@@ -204,7 +222,16 @@ table gets full (although the hit rate goes down a lot).
 * Key trick
 * Depth based replacement
 * Performance evaluation
-* CPU utilisation / cache misses
+* PSA: CPU utilisation / cache misses
+* Max depth
+
+Summary:
+* Very simple hash table implementation
+ * fixed size,
+ * fixed size linear probing to resolve collisions,
+ * possibility of false negatives
+* Depth based replacement
+* Incremental hashing
 
 Pruning
 -------
@@ -212,32 +239,98 @@ Pruning
 The last major thing we can do to improve performance is to make the
 pruning of states more effective.
 
-For example, starting from a empty Connect Four board, let's assume player 1 puts their first piece in the
-central column. Solving from this state  you see that player 1 can
-force a win from this state and so your work is done because you can't
-get better than winning.
+For example, starting from a empty Connect Four board, let's assume
+player 1 puts their first piece in the central column. Solving from
+this state you can show that player 1 can force a win from this state,
+so you can terminate your search without evaluating any other states
+because you can't get better than winning the game. If you were
+instead to explore all first move positions from left to right, you
+would do a lot of work evaluating the first three columns before you
+found the winning move.
 
-Principles of pruning: if you can find the best move first you save work
+The principle here is that some traversal orders are better than
+others and the best orders are the ones where the first move explored
+guarantees a win for either player. Of course, the catch is if you knew the
+moves which would result in a win ahead of time, you would have solved
+the whole problem already. The best we can do is work out cheap
+heuristic functions which tend to identify moves that are likely to
+result in cutoffs and explore them first.
 
-e.g. central column in c4 is a player 1 win, once you know that, why bother anywhere else?
+The first thing we can do is to determine if any child is a winning
+state before we start doing the expensive evaluation step on each
+child.
 
+    ::python
+    for child in state.children:
+        if child.evaluate() == WIN_P1 and state.player() == P1:
+           return WIN_P1
+        elif child.evaluate() == WIN_P2 and state.player() == P2:
+           return WIN_P2
 
-Early pruning of children by calls to evaluate()
-Static move ordering, prefer centre moves
-Killer heuristic
-History heuristic
-LR symmetry
-Iterative deepening
-(Perf. improvements)
+    for child in state.children:
+        child_value = alpha_beta(child, alpha, beta)
+        ...
 
-Performance
+A second idea - taking inspriation from the example above - is to
+explore the central columns first before trying the columns further
+away from the centre. This is based on the intuition that these moves
+are more valuable because there are more ways to connect a piece in
+the centre in a line of four than there are for a piece in a corner.
+
+A well-known technique to get a better move ordering in chess programming
+is the [killer heuristic](http://en.wikipedia.org/wiki/Killer_heuristic). This is a
+very simple heuristic where you keep track of the last move that
+caused a cutoff at the depth you are currently and pick that as your
+first move to explore. The idea is that the tree has some kind of
+locality where a good move for one state will be a good move for its
+sibling states since they are likely to be very similar.
+
+Another move ordering technique is the [history heuristic] where you
+keep a record of how many times a move in each column has caused a
+cutoff at any depth.
+
+One way of reducing the search space, similar to the state
+cache mentioned before is to exploit symmetries in the game state. If
+you were to mirror the board along the central column you would have a
+state that would have the exact same value. We can mirror a bitboard
+fairly quickly and make a second check in our cache for the mirrored
+board, effectively reducing the state space by a factor of two.
+
+Another way of obtaining a good move ordering is iterative deepening.
+
+Summary:
+* First sweep on children to test for winning moves
+* Static move ordering, biased to the central column
+* Killer heuristic reordering to promote the killer move
+
+Other optimisations
 ===================
-Fundamental problem is the memory access in cache get (40% run time)
-Pre-fetching
-Pooling (helped a bit)
-Sorting networks (surprisingly fast)
-Lots of evaluation on 6x5
-ncurses based output
--O3 -ftree-vectorise
-Relationship to cache size
-Profiling: Callgrind is the greatest, instruments is okay
+
+The tree things above were the major factors in getting the runtime
+down, however there were a few other things that helped to a smaller
+degree:
+  * Prefetching before cache access
+    1234
+  * Memory pooling for the states
+    Surprising
+  * Using a sorting network for the move reordering
+    You could probably do it better but sorting approach is very
+    flexible. Ended up using very little time.
+  * -O3 -ftree-vectorise
+    Got us about 10%
+  * Better reporting of the state of evaluation
+    Tracking things like cache utilisation, average index of cutoffs,
+    etc helped a lot
+  * Profilers
+    Valgrind, instruments
+
+End of the day 60% of the time is in get/put, 30% in children and
+evaluate and the rest went somewhere else.
+
+Conclusion
+==========
+
+* Harder than I thought
+* A game of orders of magnitude, speedups of any less that 5x not
+  really worth the time
+* Pruning is king
