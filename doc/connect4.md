@@ -6,21 +6,18 @@ The challenge we have before us is this:
 
 > Solve Connect Four, exactly, on a 2012 Macbook Air in no less than eight hours.
 
-Connect Four is a [solved game](http://en.wikipedia.org/wiki/Connect_Four#Mathematical_solution).
-It was solved independently by James Dow Allen and Victor Allis in the
-late 80s.
+Connect Four is a [solved game](http://en.wikipedia.org/wiki/Connect_Four#Mathematical_solution), solved independently by James Dow Allen and Victor Allis in the late 80s. The game turns out to be a win for the first player.
 
-Fhourstones
+You can use John Tromp's [Fhourstones](http://homepages.cwi.nl/~tromp/c4/fhour.html) ([github](https://github.com/qu1j0t3/fhourstones)) to compute an optimal strategy for you in about 10 minutes on my machine.
 
 * It's interesting to do something even if someone has done it before
 * It's better tested and better explained
 * I learned a lot about performance tuning algon the way.
 
-It's a win for white. This is well known.
-
 Minimax
 -------
-http://en.wikipedia.org/wiki/Minimax
+
+The first step is the [Minimax](http://en.wikipedia.org/wiki/Minimax) algorithm for solving games.
 
     :::python
     def minimax(state):
@@ -35,12 +32,10 @@ http://en.wikipedia.org/wiki/Minimax
                 else:
                     value = min(child_value, value)
             return value
+            
+The cost of the minimax algorithm in linear in the size of the game tree, but we can do better.
 
-Cost linear in the size of the game tree, but we can do better.
-
-Diagram OXO
-
-I use this to test alpha beta on the principle that it would be hard to screw it up.
+Diagram of the game tree
 
 Alpha beta
 ----------
