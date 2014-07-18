@@ -53,8 +53,8 @@ Bitboards
 ---------
 We're going to be generating the tree as we iterate over it to keep the memory budget small. This means we are going to be:
 
-1. testing whether a state is terminal, and
-2. generating all children of a state (if it's non-terminal)
+# testing whether a state is terminal, and
+# generating all children of a state (if it's non-terminal)
 
 for every state we explore.
 
@@ -119,35 +119,35 @@ The same state can be arrived at through differnet sequence of moves
 e.g. OXO
 So we cache values to reduce redundant work, can result in 100-1000x perf. improvement
 
-Closed address, linear probing hash table
-Packed 64-bit key/value
-key(49b)|lower|upper|move|depth
-No resizing
-Zobrist incremental hashing
-Clever key trick
-Depth based replacement
-Move stored to compute principle variation
+* Closed address, linear probing hash table
+* Packed 64-bit key/value
+* key(49b)|lower|upper|move|depth
+* No resizing
+* Zobrist incremental hashing
+* Clever key trick
+* Depth based replacement
+* Move stored to compute principle variation
 
 Pruning
 -------
 Principles of pruning: if you can find the best move first you save work
 e.g. central column in c4 is a player 1 win, once you know that, why bother anywhere else?
-Early pruning of children by calls to evaluate()
-Static move ordering, prefer centre moves
-Killer heuristic
-History heuristic
-LR symmetry
-Iterative deepening
-(Perf. improvements)
+* Early pruning of children by calls to evaluate()
+* Static move ordering, prefer centre moves
+* Killer heuristic
+* History heuristic
+* LR symmetry
+* Iterative deepening
+* (Perf. improvements)
 
 Performance
 ===================
 Fundamental problem is the memory access in cache get (40% run time)
-Pre-fetching
-Pooling (helped a bit)
-Sorting networks (surprisingly fast)
-Lots of evaluation on 6x5
-ncurses based output
--O3 -ftree-vectorise
-Relationship to cache size
-Profiling: Callgrind is the greatest, instruments is okay
+* Pre-fetching
+* Pooling (helped a bit)
+* Sorting networks (surprisingly fast)
+* Lots of evaluation on 6x5
+* ncurses based output
+* -O3 -ftree-vectorise
+* Relationship to cache size
+* Profiling: Callgrind is the greatest, instruments is okay (still doesn't tell you cache utilisation, perf vTune?)
