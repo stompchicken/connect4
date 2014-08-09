@@ -23,7 +23,6 @@ void packEntry(const Key& key, const Entry& entry, Packed& packed) {
     assert(entry.upper < 4);
     assert(entry.lower <= entry.upper);
     assert(entry.depth < 64);
-    assert(entry.bestMove <= MOVE_INVALID);
 #endif
 
     packed = static_cast<uint64_t>(0);

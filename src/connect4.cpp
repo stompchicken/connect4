@@ -18,7 +18,7 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
 
 #ifdef DEBUG
     assert(state.isValid());
-    assert(depth < DEPTH_MAX);
+    assert(depth <= DEPTH_MAX);
     assert(alpha <= beta);
 #endif
 

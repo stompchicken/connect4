@@ -6,7 +6,7 @@ Value minimax(const GameState& board, unsigned* variation) {
     Value value = board.evaluate();
 
 #ifdef DEBUG
-    assert(depth < DEPTH_MAX);
+    assert(depth <= DEPTH_MAX);
 #endif
 
     if(value != VALUE_UNKNOWN) {
