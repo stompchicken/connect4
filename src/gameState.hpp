@@ -48,7 +48,7 @@ class Bitboard {
         return (uint64)1 << toIndex(row, col);
     }
 
-    static uint64 parse(const std::string board&, char piece = 'X');
+    static uint64 parse(const std::string& board, char piece = 'X');
     static std::string print(uint64 board);
 
     static uint64 line4(uint64);
