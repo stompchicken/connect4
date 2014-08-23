@@ -7,6 +7,5 @@ Usage
 Warning: This will take 2Gb of RAM and several hours to complete!
     
     make
-    bin/test
-    bin/connect4 0
+    bin/connect4 0 2048
 
