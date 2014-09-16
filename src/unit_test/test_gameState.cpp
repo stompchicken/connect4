@@ -6,9 +6,7 @@ void assertEval(std::string text, int value) {
     CHECK(value == state.evaluate());
 }
 
-#if WIDTH == 7 && HEIGHT == 6
-
-TEST_CASE("GameState::evaluate", "[fast]") {
+TEST_CASE("GameState::evaluate") {
     assertEval(
         ".|.|.|.|.|.|.|\n"
         ".|.|.|.|.|.|.|\n"
@@ -119,7 +117,7 @@ TEST_CASE("GameState::evaluate", "[fast]") {
         VALUE_DRAW);
 }
 
-TEST_CASE("GameState::children", "[fast]") {
+TEST_CASE("GameState::children") {
     GameState state = GameState::parse(
         ".|.|X|.|.|.|O|\n"
         ".|.|O|O|.|.|X|\n"
@@ -182,7 +180,73 @@ TEST_CASE("GameState::children", "[fast]") {
     }
 }
 
-TEST_CASE("GameState::parse", "[fast]") {
+TEST_CASE("GameState::children(reduced)") {
+
+    GameState state = GameState::parse(
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|X|X|X|O|.|.|\n"
+        "X|O|O|O|X|.|.|");
+
+    GameState buffer[WIDTH];
+    state.children(buffer, 6, 5);
+
+    std::string childStates[WIDTH] = {
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        "X|X|X|X|O|.|.|\n"
+        "X|O|O|O|X|.|.|",
+
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|X|.|O|.|.|.|\n"
+        ".|X|X|X|O|.|.|\n"
+        "X|O|O|O|X|.|.|",
+
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|.|X|O|.|.|.|\n"
+        ".|X|X|X|O|.|.|\n"
+        "X|O|O|O|X|.|.|",
+
+        "",
+
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|.|.|O|X|.|.|\n"
+        ".|X|X|X|O|.|.|\n"
+        "X|O|O|O|X|.|.|",
+
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|.|.|X|.|.|.|\n"
+        ".|.|.|O|.|.|.|\n"
+        ".|X|X|X|O|.|.|\n"
+        "X|O|O|O|X|X|.|",
+
+        ""
+    };
+
+    for(int i=0; i<WIDTH; i++) {
+        INFO(i);
+        if(childStates[i].size() > 0) {
+            GameState child = GameState::parse(childStates[i]);
+            child.assertInvariants();
+            REQUIRE(child == buffer[i]);
+        } else {
+            REQUIRE(!buffer[i].isValid());
+        }
+    }
+}
+
+TEST_CASE("GameState::parse") {
 
     std::string board =
         ".|.|.|.|.|.|.|\n"
@@ -212,70 +276,23 @@ TEST_CASE("GameState::parse", "[fast]") {
     REQUIRE(state.print() == board);
 }
 
-#elif WIDTH == 6 && HEIGHT == 5
-
-TEST_CASE("GameState::flipLeftRight", "[fast]") {
+TEST_CASE("GameState::flipLeftRight") {
     GameState state = GameState::parse(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|X|.|\n"
-        ".|.|X|.|O|.|\n"
-        ".|X|O|O|X|O|");
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|X|.|.|\n"
+        ".|.|X|.|O|.|.|\n"
+        ".|X|O|O|X|O|.|");
 
     GameState flip = state.flipLeftRight();
     REQUIRE(flip.getPlayer() == state.getPlayer());
     REQUIRE(flip.getDepth() == state.getDepth());
     REQUIRE(flip.print() ==
-            ".|.|.|.|.|.|\n"
-            ".|.|.|.|.|.|\n"
-            ".|X|.|.|.|.|\n"
-            ".|O|.|X|.|.|\n"
-            "O|X|O|O|X|.|");
+            ".|.|.|.|.|.|.|\n"
+            ".|.|.|.|.|.|.|\n"
+            ".|.|.|.|.|.|.|\n"
+            ".|.|X|.|.|.|.|\n"
+            ".|.|O|.|X|.|.|\n"
+            ".|O|X|O|O|X|.|");
 }
-
-
-TEST_CASE("GameState::evaluate", "[fast]") {
-    assertEval(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|",
-        VALUE_UNKNOWN);
-
-    assertEval(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|X|\n"
-        ".|.|.|.|.|X|\n"
-        ".|.|.|.|.|X|\n"
-        ".|.|.|.|.|X|",
-        VALUE_MAX);
-
-    assertEval(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        "X|X|X|X|.|.|",
-        VALUE_MAX);
-
-    assertEval(
-        ".|.|.|X|.|.|\n"
-        ".|.|X|.|.|.|\n"
-        ".|X|.|.|.|.|\n"
-        "X|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|",
-        VALUE_MAX);
-
-    assertEval(
-        ".|.|.|.|.|X|\n"
-        ".|.|.|.|X|.|\n"
-        ".|.|.|X|.|.|\n"
-        ".|.|X|.|.|.|\n"
-        ".|.|.|.|.|.|",
-        VALUE_MAX);
-}
-#endif
-
-
-

@@ -6,8 +6,6 @@
 #include <ncurses.h>
 #include <sstream>
 
-#define MB 131072
-
 bool terminate = false;
 
 void printStats(const Connect4& game, double duration) {
@@ -54,14 +52,21 @@ void* statsLoop(void *arg){
 
 int main(int argc, char* argv[]) {
 
-    if(argc != 3) {
-        std::cerr << "Usage: connect4 [startDepth] [cacheSize(MB)]" << std::endl;
+    if(argc != 3 && argc != 5 ) {
+        std::cerr << "Usage: connect4 [startDepth] [cacheSize(MB)] [width=7] [height=6]" << std::endl;
         exit(-1);
     }
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
-    size_t cacheSize = static_cast<size_t>(std::atoi(argv[2])) * MB;
+    size_t cacheSize = static_cast<size_t>(std::atoi(argv[2])) * Cache::Megabytes;
 
     Connect4 game(cacheSize);
+
+    if(argc == 5) {
+        unsigned width = static_cast<unsigned>(std::atoi(argv[3]));
+        unsigned height = static_cast<unsigned>(std::atoi(argv[4]));
+        game.setBoardSize(width, height);
+    }
+
     GameState state = GameState::random(depth);
 
     std::cout << "Solving:" << std::endl;

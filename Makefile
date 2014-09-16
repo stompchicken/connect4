@@ -1,55 +1,58 @@
-INCLUDES=-Isrc -Itest
-
-CFLAGS=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include -Wextra -pedantic #-Weverything
-LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib
-
-SRC=$(wildcard src/*.cpp)
-OBJ=$(patsubst src/%.cpp,build/%.o,$(SRC))
-
-TEST_SRC=$(wildcard test/*.cpp)
-TEST_OBJ=$(patsubst test/%.cpp,build/%.o,$(TEST_SRC))
-TEST_OBJ+=$(OBJ)
-TEST_OBJ:=$(filter-out build/main.o, $(TEST_OBJ))
-
-BENCH_SRC=$(wildcard bench/*.cpp)
-BENCH_OBJ=$(patsubst bench/%.cpp,build/%.o,$(BENCH_SRC))
-BENCH_OBJ+=$(OBJ)
-BENCH_OBJ:=$(filter-out build/main.o, $(BENCH_OBJ))
-
-.PHONY: setup
+INCLUDES=-Isrc
 
 ifdef DEBUG
-	$(info 1)
-	OPTFLAGS=-O1 -g
-	CFLAGS+=-DDEBUG
+OPTFLAGS=-g
+CFLAGS=-DDEBUG
 else
-	$(info 2)
-	OPTFLAGS=-O3 -ftree-vectorize -msse2 -funroll-loops
+OPTFLAGS=-O3 -ftree-vectorize -msse2 -funroll-loops
+CFLAGS=-DNDEBUG
 endif
 
-all: bin/connect4 bin/test bin/bench
+CFLAGS+=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include -Wextra -pedantic #-Weverything
+LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib
 
-setup:
-	@mkdir -p build
-	@mkdir -p bin
+CONNECT4_SRC=$(wildcard src/*.cpp)
+CONNECT4_OBJ=$(patsubst src/%.cpp, build/%.o, $(CONNECT4_SRC))
+CONNECT4_OBJ:=$(filter-out build/main.o, $(CONNECT4_OBJ))
 
-bin/connect4: setup $(OBJ)
-	$(CXX) $(OBJ) -o bin/connect4 $(LDFLAGS)
+UNITTEST_SRC=$(wildcard src/unit_test/*.cpp)
+UNITTEST_OBJ=$(patsubst src/unit_test/%.cpp, build/unit_test/%.o, $(UNITTEST_SRC))
+UNITTEST_OBJ:=$(filter-out build/unit_test/main.o, $(UNITTEST_OBJ))
 
-bin/test: setup $(TEST_OBJ)
-	$(CXX) $(TEST_OBJ) -o bin/test $(LDFLAGS)
+PROPTEST_SRC=$(wildcard src/prop_test/*.cpp)
+PROPTEST_OBJ=$(patsubst src/prop_test/%.cpp, build/prop_test/%.o, $(PROPTEST_SRC))
+PROPTEST_OBJ:=$(filter-out build/prop_test/main.o, $(PROPTEST_OBJ))
 
-bin/bench: setup $(BENCH_OBJ)
-	$(CXX) $(BENCH_OBJ) -o bin/bench $(LDFLAGS)
+BENCH_SRC=$(wildcard src/bench/*.cpp)
+BENCH_OBJ=$(patsubst src/bench/%.cpp, build/bench/%.o, $(BENCH_SRC))
+BENCH_OBJ:=$(filter-out build/bench/main.o, $(BENCH_OBJ))
+
+.PHONY: all
+.DEFAULT: bin/connect4
+
+all: bin/connect4 bin/unit_test bin/prop_test bin/bench
+
+src/%.cpp: src/%.hpp
 
 build/%.o: src/%.cpp
-	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
+	@mkdir -p "$(@D)"
+	$(CXX) -c $(INCLUDES) $(CFLAGS) -o $@ $< 
 
-build/%.o: test/%.cpp
-	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
+bin/connect4: $(CONNECT4_OBJ) build/main.o
+	@mkdir -p "$(@D)"
+	$(CXX) $(CONNECT4_OBJ) build/main.o -o bin/connect4 $(LDFLAGS)
 
-build/%.o: bench/%.cpp
-	$(CXX) -c $(INCLUDES) -o $@ $< $(CFLAGS)
+bin/unit_test: $(UNITTEST_OBJ) $(CONNECT4_OBJ) build/unit_test/main.o
+	@mkdir -p "$(@D)"
+	$(CXX) $(UNITTEST_OBJ) $(CONNECT4_OBJ) build/unit_test/main.o -o bin/unit_test $(LDFLAGS)
+
+bin/prop_test: $(PROPTEST_OBJ) $(CONNECT4_OBJ) build/prop_test/main.o
+	@mkdir -p "$(@D)"
+	$(CXX) $(PROPTEST_OBJ) $(CONNECT4_OBJ) build/prop_test/main.o -o bin/prop_test $(LDFLAGS)
+
+bin/bench: $(BENCH_OBJ) $(CONNECT4_OBJ) build/bench/main.o
+	@mkdir -p "$(@D)"
+	$(CXX) $(BENCH_OBJ) $(CONNECT4_OBJ) build/bench/main.o -o bin/bench $(LDFLAGS)
 
 clean:
 	@rm -rf bin

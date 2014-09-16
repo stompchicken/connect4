@@ -4,8 +4,9 @@
 #include <cassert>
 
 /*
- * RAII style class for an array of objects drawn from a pool
+ * Simple memory pool for a objects of a declared type
  */
+
 template<typename T>
 class PoolEntry {
 
@@ -26,9 +27,6 @@ class PoolEntry {
     size_t& index;
 };
 
-/*
- * Simple memory pool
- */
 template<typename T>
 class Pool {
 

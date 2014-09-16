@@ -14,7 +14,7 @@ class MoveOrder {
         reset();
     }
 
-    void cutoff(Depth depth, unsigned move) {
+    void recordCutoffMove(Depth depth, unsigned move) {
         killerMove[depth] = move;
     }
 

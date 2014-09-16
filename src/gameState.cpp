@@ -3,154 +3,6 @@
 #include <algorithm>
 #include <cassert>
 
-uint64 Bitboard::parse(const std::string& text, char piece) {
-    uint64 mask;
-    unsigned col = 0;
-    unsigned row = HEIGHT - 1;
-    uint64 board = 0;
-    for(unsigned i = 0; i < text.size(); i++) {
-        mask = toMask(row, col);
-        if(text[i] == '\n') {
-            row -= 1;
-            col = 0;
-        } else if(text[i] == '|') {
-            col += 1;
-        } else if(text[i] == piece) {
-            board |= mask;
-        }
-    }
-    return board;
-}
-
-std::string Bitboard::print(uint64 b) {
-    std::string text;
-    uint64 mask;
-    for(unsigned row=0; row<HEIGHT; row++) {
-        for(unsigned col=0; col<WIDTH; col++) {
-            mask = Bitboard::toMask((HEIGHT-1)-row, col);
-
-            if(b & mask) {
-                text.append("X|");
-            } else {
-                text.append(".|");
-            }
-        }
-        if(row != HEIGHT - 1) {
-            text.append("\n");
-        }
-    }
-    return text;
-}
-
-
-uint64 Bitboard::line4(uint64 b) {
-    uint64 x = 0;
-
-    x = (b << 2) & b;
-    uint64 vertical = x & (x << 1);
-
-    x = (b << (2*(HEIGHT+1))) & b;
-    uint64 horizontal = x & (x << (HEIGHT+1));
-
-    x = (b << (2*(HEIGHT+2))) & b;
-    uint64 diagRight = x & (x << (HEIGHT+2));
-
-    x = (b << (2*(HEIGHT))) & b;
-    uint64 diagLeft = x & (x << (HEIGHT));
-
-    return (vertical | horizontal | diagLeft | diagRight) & Bitboard::zeroBarrier;
-}
-
-uint64 Bitboard::line3(uint64 b) {
-    uint64 x = 0;
-    uint s = 0;
-    uint64 l1, l2, l3;
-    uint64 r1, r2, r3;
-
-    // Vertical
-    s = 1;
-    l1 = b << 1;
-    l2 = b << 2;
-    l3 = b << 3;
-    r1 = b >> 1;
-    r2 = b >> 2;
-    r3 = b >> 3;
-
-    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
-         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
-
-    // Horizontal
-    s = HEIGHT+1;
-    l1 = b << 1*s;
-    l2 = b << 2*s;
-    l3 = b << 3*s;
-    r1 = b >> 1*s;
-    r2 = b >> 2*s;
-    r3 = b >> 3*s;
-
-    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
-         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
-
-    // Left diagonal
-    s = HEIGHT;
-    l1 = b << 1*s;
-    l2 = b << 2*s;
-    l3 = b << 3*s;
-    r1 = b >> 1*s;
-    r2 = b >> 2*s;
-    r3 = b >> 3*s;
-
-    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
-         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
-
-    // Right diagonal
-    s = HEIGHT+2;
-    l1 = b << 1*s;
-    l2 = b << 2*s;
-    l3 = b << 3*s;
-    r1 = b >> 1*s;
-    r2 = b >> 2*s;
-    r3 = b >> 3*s;
-
-    x |= (~b & l1 & l2 & l3) | (~b & l1 & l2 & r1) |
-         (~b & r1 & r2 & l1) | (~b & r1 & r2 & r3);
-
-    return x & Bitboard::zeroBarrier;
-}
-
-uint64 Bitboard::line2(uint64 b) {
-    uint64 x = 0;
-    uint s = 1;
-    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
-    s = HEIGHT;
-    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
-    s = HEIGHT+1;
-    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
-    s = HEIGHT+2;
-    x |= ~b & (b << (1*s)) & (b << (2*s)) & ~(b << (3*s));
-    return x;
-}
-
-uint64 makeZeroBarrier() {
-    uint64 z = 0;
-    for(unsigned row=0; row<HEIGHT; row++) {
-        for(unsigned col=0; col<WIDTH; col++) {
-            z |= Bitboard::toMask(row, col);
-        }
-    }
-    return z;
-}
-
-uint64 makeBaseBarrier() {
-    uint64 base = 0;
-    for(unsigned col=0; col<WIDTH; col++) {
-        base |= Bitboard::toMask(0, col);
-    }
-    return base;
-}
-
-uint64 Bitboard::zeroBarrier = makeZeroBarrier();
-uint64 Bitboard::baseBarrier = makeBaseBarrier();
 
 GameState::Hasher GameState::hasher;
 
@@ -185,16 +37,16 @@ GameState& GameState::operator=(const GameState& other) {
     return *this;
 }
 
-GameState GameState::random(Depth moves) {
+GameState GameState::random(Depth moves, unsigned width, unsigned height) {
     GameState board;
     do {
         board = GameState();
         for(unsigned i=0; i<moves; i++) {
             GameState nodeBuffer[WIDTH];
-            board.children(nodeBuffer);
+            board.children(nodeBuffer, width, height);
             unsigned offset = static_cast<unsigned>(rand());
-            for(unsigned j=0; j<WIDTH; j++) {
-                board = nodeBuffer[(j + offset) % WIDTH];
+            for(unsigned j=0; j<width; j++) {
+                board = nodeBuffer[(j + offset) % width];
                 if(board.isValid()) break;
             }
         }
@@ -225,16 +77,17 @@ bool GameState::operator!=(const GameState& rhs) const {
 }
 
 // Pass a pre-assigned buffer of size WIDTH
-void GameState::children(GameState* buffer) const {
+void GameState::children(GameState* buffer, unsigned width, unsigned height) const {
     for(unsigned col=0; col<WIDTH; col++) {
+
         GameState* child = buffer+col;
         unsigned row = emptyPos[col];
-        if(row < HEIGHT) {
+        if(row < height && col < width) {
             child->p1 = p1;
             child->p2 = p2;
             child->depth = depth;
             child->player = player;
-            for(int i=0; i<WIDTH; i++) {
+            for(unsigned i=0; i<width; i++) {
                 child->emptyPos[i] = this->emptyPos[i];
             }
             child->makeMove(row, col);
@@ -244,7 +97,6 @@ void GameState::children(GameState* buffer) const {
             child->player = PLAYER_INVALID;
         }
     }
-
 }
 
 Value GameState::evaluate() const {
@@ -261,7 +113,7 @@ Value GameState::evaluate() const {
     return VALUE_UNKNOWN;
 }
 
-uint8 GameState::heuristic() const {
+Value GameState::heuristic() const {
     Value val = evaluate();
     if(val == VALUE_MAX) {
         return 255;
@@ -278,8 +130,8 @@ uint8 GameState::heuristic() const {
 
 GameState GameState::flipLeftRight() const {
     GameState flip;
-    flip.p1 = Bitboard::flipLeftRight(p1);
-    flip.p2 = Bitboard::flipLeftRight(p2);
+    flip.p1 = Bitboard::flip(p1);
+    flip.p2 = Bitboard::flip(p2);
     flip.generateDerivedFields();
     return flip;
 }
@@ -310,8 +162,8 @@ std::ostream& operator<<(std::ostream& os, const GameState& board) {
     os << "GameState: {";
     os << "p1=" << board.p1 << " ";
     os << "p2=" << board.p2 << " ";
-    os << "player=" << board.player << " ";
-    os << "depth=" << board.depth << " ";
+    os << "player=" << (int)board.player << " ";
+    os << "depth=" << (int)board.depth << " ";
     os << "xorHash=" << board.xorHash << " ";
     os << "emptyPos=";
     for(unsigned i=0; i<WIDTH; i++) {
@@ -381,26 +233,3 @@ uint64 flipLeftRight(uint64 x) {
     return output;
 }
 
-Player flipPlayer(Player player) {
-    return player == PLAYER_MAX ? PLAYER_MIN : PLAYER_MAX;
-}
-
-std::string printPlayer(Player player) {
-    return player == PLAYER_MAX ? "PLAYER_MAX" : "PLAYER_MIN";
-}
-
-
-Value flipValue(Value value) {
-    if(value == VALUE_UNKNOWN) return VALUE_UNKNOWN;
-    else if(value == VALUE_MAX) return VALUE_MIN;
-    else if(value == VALUE_MIN) return VALUE_MAX;
-    else return VALUE_DRAW;
-}
-
-std::string printValue(Value value) {
-    if(value == VALUE_UNKNOWN) return "VALUE_UNKNOWN";
-    else if(value == VALUE_MAX) return "VALUE_MAX";
-    else if(value == VALUE_MIN) return "VALUE_MIN";
-    else return "VALUE_DRAW";
-
-}

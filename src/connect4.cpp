@@ -5,21 +5,26 @@
 #define MAX_CACHE_DEPTH WIDTH*HEIGHT - 4
 
 Value Connect4::solve(const GameState& state) {
+    this->reset();
     moveOrder.reset();
-    Value value = alphaBeta(state, VALUE_MIN, VALUE_MAX);
+    Move bestMove;
+    Value value = alphaBeta(state, VALUE_MIN, VALUE_MAX, bestMove);
     return value;
 }
 
-Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
+Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value beta, Move& bestMove) {
     stats->nodesExplored++;
 
     Depth depth = state.getDepth();
     Player player = state.getPlayer();
 
+
+
 #ifdef DEBUG
     assert(state.isValid());
     assert(depth <= DEPTH_MAX);
     assert(alpha <= beta);
+    bestMove = MOVE_INVALID;
 #endif
 
 //    cache->prefetch(state);
@@ -27,12 +32,17 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
         return value;
+    } else if(depth == this->height * this->width) {
+        return VALUE_DRAW;
     }
+
+    Value a = alpha;
+    Value b = beta;
 
     // Look up state in cache
     Entry cacheEntry;
-    unsigned bestMove = MOVE_INVALID;
-    if(depth <= MAX_CACHE_DEPTH && cache->get(state, cacheEntry)) {
+    if(depth <= maxCacheDepth && cache->get(state, cacheEntry)) {
+        if(depth <= 33) { std::cout << "Cache hit" << std::endl; }
         stats->cacheHits++;
 
         if(cacheEntry.lower == cacheEntry.upper) {
@@ -43,12 +53,9 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
             return cacheEntry.upper;
         }
 
-        alpha = std::max(alpha, cacheEntry.lower);
-        beta = std::min(beta, cacheEntry.upper);
+        a = std::max(a, cacheEntry.lower);
+        b = std::min(b, cacheEntry.upper);
 
-        if(cacheEntry.bestMove != MOVE_INVALID) {
-            bestMove = cacheEntry.bestMove;
-        }
     } else {
         stats->cacheMisses++;
         cacheEntry.lower = VALUE_MIN;
@@ -59,44 +66,46 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     unsigned moves[WIDTH];
     PoolEntry<GameState> children = statePool.get(WIDTH);
     moveOrder.reorder(depth+1, MOVE_INVALID, moves);
-    state.children(children.data);
-
+    state.children(children.data, this->width, this->height);
+/*
     // Check for obvious winners
-    for(unsigned i=0; i<WIDTH; i++) {
-        const GameState& child = children.data[i];
+    for(Move move=0; move<WIDTH; move++) {
+        const GameState& child = children.data[move];
         if(!child.isValid()) continue;
         Value value = child.evaluate();
         if(player == PLAYER_MAX && value == VALUE_MAX) {
+            bestMove = move;
             return VALUE_MAX;
         }
         if(player == PLAYER_MIN && value == VALUE_MIN) {
+            bestMove = move;
             return VALUE_MIN;
         }
     }
-
-    Value a = alpha;
-    Value b = beta;
+*/
     for(unsigned i=0; i<WIDTH; i++) {
-        const unsigned move = moves[i];
+        const Move move = moves[i];
         const GameState& child = children.data[move];
 
         if(!child.isValid()) continue;
 
         Value childVal;
+        Move childBestMove;
         if(player == PLAYER_MAX) {
-            childVal = alphaBeta(child, a, beta);
+            childVal = alphaBeta(child, a, beta, childBestMove);
+
             if(value == VALUE_UNKNOWN || childVal > value) {
                 value = childVal;
                 bestMove = move;
-                moveOrder.cutoff(depth+1, bestMove);
+                moveOrder.recordCutoffMove(depth+1, bestMove);
                 a = std::max(a, value);
             }
         } else {
-            childVal = alphaBeta(child, alpha, b);
+            childVal = alphaBeta(child, alpha, b, childBestMove);
             if(value == VALUE_UNKNOWN || childVal < value) {
                 value = childVal;
                 bestMove = move;
-                moveOrder.cutoff(depth+1, bestMove);
+                moveOrder.recordCutoffMove(depth+1, bestMove);
                 b = std::min(b, value);
             }
         }
@@ -110,40 +119,68 @@ Value Connect4::alphaBeta(const GameState& state, Value alpha, Value beta) {
     }
 
     // Store new bounds to cache
-    if(depth <= MAX_CACHE_DEPTH) {
-        if(value <= alpha) {
-            cacheEntry.upper = value;
-            cacheEntry.bestMove = MOVE_INVALID;
-        } else if (value > alpha && value < beta) {
+    if(depth <= maxCacheDepth) {
+
+        if (value >= alpha && value <= beta) {
             cacheEntry.lower = value;
             cacheEntry.upper = value;
             cacheEntry.bestMove = bestMove;
+        } else if(value <= alpha) {
+            cacheEntry.upper = value;
+            cacheEntry.bestMove = MOVE_INVALID;
         } else if(value >= beta) {
             cacheEntry.lower = value;
             cacheEntry.bestMove = MOVE_INVALID;
         }
-
         cacheEntry.depth = depth;
         cache->put(state, cacheEntry);
     }
+
+#ifdef DEBUG
+    assert(bestMove != MOVE_INVALID);
+#endif
+
+    if(depth <= 33) { std::cout << state.print() << std::endl; }
+    if(depth <= 33) { std::cout << "Value = " << printValue(value) << std::endl; }
+
+
     return value;
 }
 
-void Connect4::principleVariation(const GameState& state, unsigned* moves) {
-    GameState board = state;
-    GameState children[WIDTH];
+void Connect4::principleVariation(const GameState& board, Move buffer[DEPTH_MAX]) {
+
+    for(unsigned i=0; i<DEPTH_MAX; i++) {
+        buffer[i] = MOVE_INVALID;
+    }
+
+    GameState state = board;
+    Move bestMove;
     Entry cacheEntry;
-    while(cache->get(board, cacheEntry)) {
-        assert(cacheEntry.lower <= cacheEntry.upper);
+    for(Depth depth=board.getDepth(); depth<DEPTH_MAX; depth++) {
+        std::cout << "Depth=" << (int)depth << std::endl;
+        GameState children[WIDTH];
+        state.children(children, this->width, this->height);
+        std::cout << state.print() << std::endl;
 
-//        std::cout << board.print() << std::endl;
-        std::cout << static_cast<int>(cacheEntry.bestMove) << std::endl;
-//        std::cout << printValue(cacheEntry.lower) << std::endl;
-//        std::cout << std::endl;
-        board.children(children);
-        board = children[cacheEntry.bestMove];
+        Value value = state.evaluate();
+        if(value != VALUE_UNKNOWN) {
+            buffer[depth] = MOVE_INVALID;
+        } else if(depth >= this->width * this->height) {
+            buffer[depth] = MOVE_INVALID;
+        } else {
 
-        moves[0] = cacheEntry.bestMove;
-        assert(board.isValid());
+            if(cache->get(state, cacheEntry) && cacheEntry.bestMove != MOVE_INVALID) {
+                std::cout << "Cache hit" << std::endl;
+                std::cout << "Best move=" << (int)cacheEntry.bestMove << std::endl;
+                buffer[depth] = cacheEntry.bestMove;
+                state = children[cacheEntry.bestMove];
+            } else {
+                std::cout << "Cache miss" << std::endl;
+                alphaBeta(state, VALUE_MIN, VALUE_MAX, bestMove);
+                std::cout << "Best move=" << (int)bestMove << std::endl;
+                buffer[depth] = bestMove;
+                state = children[bestMove];
+            }
+        }
     }
 }

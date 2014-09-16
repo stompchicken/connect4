@@ -23,6 +23,7 @@ void packEntry(const Key& key, const Entry& entry, Packed& packed) {
     assert(entry.upper < 4);
     assert(entry.lower <= entry.upper);
     assert(entry.depth < 64);
+    assert(entry.bestMove < WIDTH || entry.bestMove == MOVE_INVALID);
 #endif
 
     packed = static_cast<uint64_t>(0);
@@ -39,6 +40,14 @@ void unpackEntry(const Packed& value, Key& key, Entry& entry) {
     entry.upper = static_cast<uint8_t>(value >> 11) & 0x3;
     entry.depth = static_cast<uint8_t>(value >> 5) & 0x3f;
     entry.bestMove = static_cast<uint8_t>(value >> 1) & 0x7;
+
+#ifdef DEBUG
+    assert(entry.lower < 4);
+    assert(entry.upper < 4);
+    assert(entry.lower <= entry.upper);
+    assert(entry.depth < 64);
+    assert(entry.bestMove < WIDTH || entry.bestMove == MOVE_INVALID);
+#endif
 }
 
 Cache::Cache(uint64_t capacity_) : capacity(capacity_) {

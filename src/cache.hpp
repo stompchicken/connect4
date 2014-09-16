@@ -7,7 +7,18 @@ typedef uint32 Hash;
 typedef uint64 Key;
 typedef uint64 Packed;
 
-// Key/value entry that is packed into 64 bits
+/* Key/value entry that is packed into 64 bits
+
+            size  bit range(LSB)
+    key       48      63-15
+    lower      2      14-13
+    upper      2      12-11
+    depth      6      10-05
+    bestMove   4      04-01
+
+   Note that this truncates Value and Depth types to sizes smaller than their
+   range.
+*/
 struct Entry {
     // Lower bound on value of state
     Value lower;
@@ -16,7 +27,7 @@ struct Entry {
     // Depth of state
     Depth depth;
     // The index of the optimal move at this state
-    uint8_t bestMove;
+    Move bestMove;
 };
 
 void packEntry(const Key& key, const Entry& entry, Packed& packed);
@@ -43,6 +54,12 @@ class Cache {
     // This is used for something like iterative deepening
     void clearValues();
     std::string statistics() const;
+
+    // For convience in specifying the cache size
+    static const uint64 Kilobytes = (1024)/8;
+    static const uint64 Megabytes = (1024*1024)/8;
+    static const uint64 Gigabytes = (1024*1024*1024)/8;
+
 
   private:
     // Number of entries in the hashtable

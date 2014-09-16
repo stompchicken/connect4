@@ -1,24 +1,20 @@
 #include "catch.hpp"
 #include "moveOrder.hpp"
 
-#if WIDTH == 7
-
-#else
-
 TEST_CASE("Moves::reorder", "[fast]") {
 
     MoveOrder moveOrder;
     GameState parent = GameState::parse(
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|.|.|.|.|\n"
-        ".|.|X|X|.|.|\n");
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|.|.|.|.|.|\n"
+        ".|.|X|X|.|.|.|\n");
 
     unsigned moves[WIDTH];
     GameState children[WIDTH];
     Depth depth = parent.getDepth();
-
 
     moveOrder.reorder(1, MOVE_INVALID, moves);
     parent.children(children);
@@ -33,7 +29,7 @@ TEST_CASE("Moves::reorder", "[fast]") {
     REQUIRE(moves[4] == 5);
     REQUIRE(moves[5] == 0);
 
-    moveOrder.cutoff(depth, 4);
+    moveOrder.recordCutoffMove(depth, 4);
 
     moveOrder.reorder(depth, MOVE_INVALID, moves);
     REQUIRE(moves[0] == 4);
@@ -52,5 +48,3 @@ TEST_CASE("Moves::reorder", "[fast]") {
     REQUIRE(moves[5] == 0);
 
 }
-
-#endif
