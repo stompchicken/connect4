@@ -1,5 +1,5 @@
-#ifndef STATE
-#define STATE
+#ifndef NAIVESTATE
+#define NAIVESTATE
 
 #include "common.hpp"
 #include "gameState.hpp"

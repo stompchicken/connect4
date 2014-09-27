@@ -2,7 +2,6 @@
 #define MOVEORDER_H
 
 #include "common.hpp"
-#include "gameState.hpp"
 
 /*
  * Reorders children nodes
@@ -11,23 +10,25 @@ class MoveOrder {
 
   public:
     MoveOrder() {
+        Move moves[WIDTH] = {3, 2, 4, 1, 5, 0, 6};
+        setStaticOrder(moves);
         reset();
     }
 
-    void recordCutoffMove(Depth depth, unsigned move) {
-        killerMove[depth] = move;
-    }
+    void reset();
 
-    void reset() {
-        for(unsigned i=0; i<DEPTH_MAX; i++) {
-            killerMove[i] = MOVE_INVALID;
-        }
-    }
+    void recordCutoffMove(Depth depth, Move move);
 
-    void reorder(Depth depth, unsigned cachedMove, unsigned moves[WIDTH]);
+    void setStaticOrder(Move* moves);
+    void getStaticOrder(Move* moves) const;
+
+    void reorder(Depth depth, Move* moves) const;
+    void reorder(Depth depth, Move bestMove, Move* moves) const;
 
   private:
-    uint8 killerMove[DEPTH_MAX];
+    Move staticMoves[WIDTH];
+    uint64 staticMoveValue[WIDTH];
+    Move killerMove[DEPTH_MAX+1];
 };
 
 

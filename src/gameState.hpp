@@ -24,7 +24,7 @@ class GameState {
     static GameState random(Depth depth, unsigned width=WIDTH, unsigned height=HEIGHT);
     static GameState parse(const std::string& text);
 
-    // Incremetal Zobrist hash
+    // Incremental Zobrist hash
     inline uint64 hash() const { return xorHash; }
     inline uint64 key() const {  return p1 | ((p1 | p2) + Bitboard::baseBarrier); }
 
@@ -45,7 +45,7 @@ class GameState {
 
     GameState flipLeftRight() const;
 
-    std::string print() const;
+    std::string print(std::string indent="") const;
 
     void assertInvariants() const;
 

@@ -10,3 +10,9 @@ Warning: This will take 2Gb of RAM and several hours to complete!
     make
     bin/connect4 0 2048
 
+Tests
+-----
+
+    make DEBUG=1
+    bin/unit_test
+    bin/prop_test

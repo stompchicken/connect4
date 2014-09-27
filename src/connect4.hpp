@@ -27,15 +27,31 @@ struct Stats {
     uint64 cacheHits;
     uint64 cacheMisses;
 };
-
 std::ostream& operator<<(std::ostream &output, const Stats &stats);
+
+struct Config {
+
+    Config() : useCache(true),
+               maxCacheDepth(DEPTH_MAX - 8),
+               reorderMoves(true),
+               depthFirstScan(true) {
+    };
+
+    bool useCache;
+    Depth maxCacheDepth;
+    bool reorderMoves; 
+    bool depthFirstScan;
+};
+std::ostream& operator<<(std::ostream &output, const Config &config);
+
 
 class Connect4 {
   public:
     Connect4(long cacheSize) : width(7), height(6),
                                cache(new Cache(cacheSize)),
                                stats(new Stats()),
-                               statePool(WIDTH*(DEPTH_MAX+1)) {
+                               statePool(WIDTH*(DEPTH_MAX+1)),
+                               moveOrder(), config() {
     }
 
     ~Connect4() {
@@ -49,6 +65,9 @@ class Connect4 {
     }
 
     Value solve(const GameState& board);
+    void printState(const GameState& state, const std::string& msg, Value alphaBeta, Value alpha, Value beta);
+
+    Value minimax(const GameState& board);
 
     // Alpha-beta with caching
     Value alphaBeta(const GameState& board, const Value alpha, const Value beta, Move& bestMove);
@@ -60,14 +79,7 @@ class Connect4 {
         moveOrder.reset();
     }
 
-
     const Stats& getStats() const { return *stats; }
-//    void resetStats() {
-//        delete stats;
-//        stats = new Stats();
-//    }
-//    void clearCache() { cache->clear(); }
-//    void clearCacheValues() { cache->clearValues(); }
     std::string getCacheStats() const { return cache->statistics(); }
 
   private:
@@ -77,11 +89,9 @@ class Connect4 {
     Stats* stats;
     Pool<GameState> statePool;
     MoveOrder moveOrder;
-    static const Depth maxCacheDepth = 30;//DEPTH_MAX - 8;
-
+    Config config;
 
     // No copying allowed
     Connect4(const Connect4& other);
     Connect4& operator=(const Connect4& other);
-
 };

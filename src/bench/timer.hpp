@@ -27,19 +27,19 @@ public:
 private:
     std::clock_t time;
     long n;
+    double min;
+    double max;
     double mean;
 
     void update(double duration) {
         n++;
         mean += (duration - mean) / n;
+        max = std::max(max, duration);
+        min = std::min(min, duration);
     }
 
 };
 
-std::ostream& operator<<(std::ostream& os, const Timer& timer) {
-    os << "n=" << timer.n << " mean=" << timer.mean << "s";
-    return os;
-}
 
 
 #endif

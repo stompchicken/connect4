@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <iostream>
 
 #define WIDTH  7
 #define HEIGHT 6

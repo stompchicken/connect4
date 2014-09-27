@@ -136,7 +136,7 @@ GameState GameState::flipLeftRight() const {
     return flip;
 }
 
-std::string GameState::print() const {
+std::string GameState::print(std::string indent) const {
     std::string text;
     uint64 mask;
     for(unsigned row=0; row<HEIGHT; row++) {
@@ -153,6 +153,7 @@ std::string GameState::print() const {
         }
         if(row != HEIGHT - 1) {
             text.append("\n");
+            text.append(indent);
         }
     }
     return text;
