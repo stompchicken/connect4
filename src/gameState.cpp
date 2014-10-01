@@ -39,7 +39,7 @@ GameState& GameState::operator=(const GameState& other) {
 
 GameState GameState::random(Depth moves, unsigned width, unsigned height) {
     GameState board;
-    do {
+//    do {
         board = GameState();
         for(unsigned i=0; i<moves; i++) {
             GameState nodeBuffer[WIDTH];
@@ -50,7 +50,7 @@ GameState GameState::random(Depth moves, unsigned width, unsigned height) {
                 if(board.isValid()) break;
             }
         }
-    } while (board.evaluate() != VALUE_UNKNOWN);
+//    } while (board.evaluate() != VALUE_UNKNOWN);
     return board;
 }
 

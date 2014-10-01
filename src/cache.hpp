@@ -43,7 +43,7 @@ std::ostream& operator<<(std::ostream &output, const Entry &val);
  */
 class Cache {
   public:
-    Cache(uint64 capacity);
+    Cache(uint64 capacity, uint64 probe=8, bool replacement=true);
     virtual ~Cache();
     // Use prefetch intrinsics to reduce latency of get calls
     void prefetch(const GameState& state) const;
@@ -74,7 +74,10 @@ class Cache {
 
     // Size of the linear probing before returning failure
     // (The size of a cache line in modern Intel chips is 64 bytes)
-    const static uint64 probe = 8;
+    const uint64 probe;
+
+    // Replace entries with less deep ones
+    const bool replacement;
 
     // No copying
     Cache(const Cache& other);

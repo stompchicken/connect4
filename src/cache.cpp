@@ -50,7 +50,8 @@ void unpackEntry(const Packed& value, Key& key, Entry& entry) {
 #endif
 }
 
-Cache::Cache(uint64_t capacity_) : capacity(capacity_) {
+Cache::Cache(uint64 capacity_, uint64 probe_, bool replace) : 
+    capacity(capacity_), probe(probe_), replacement(replace) {
     size = 0;
     // Zero out the hashtable
     hashtable = new uint64_t[capacity]();
@@ -127,7 +128,7 @@ bool Cache::put(const GameState& state, const Entry& entry) {
             this->hashtable[index] = newValue;
             this->counts[depth] += 1;
             return true;
-        } else if(depth < currentEntry.depth) {
+        } else if(replacement && depth < currentEntry.depth) {
             // Replace entry
             this->hashtable[index] = newValue;
             this->counts[currentEntry.depth] -= 1;

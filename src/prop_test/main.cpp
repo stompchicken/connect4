@@ -1,46 +1,12 @@
 #include "connect4.hpp"
-/*
-Value minimax(const GameState& board, Move& bestMove, unsigned width, unsigned height) {
-    Depth depth = board.getDepth();
-    Value value = board.evaluate();
-    bestMove = MOVE_INVALID;
 
-#ifdef DEBUG
-    assert(board.isValid());
-    assert(depth <= DEPTH_MAX);
-#endif
-
-    if(value != VALUE_UNKNOWN) {
-        return value;
-    } else if (depth == width*height) {
-        return VALUE_DRAW;
-    } else {
-        GameState buffer[WIDTH];
-        board.children(buffer, width, height);
-
-        value = VALUE_UNKNOWN;
-        for(int i=0; i<WIDTH; i++) {
-            if(buffer[i].isValid()) {
-                Move childBestMove;
-                Value val = minimax(buffer[i], childBestMove, width, height);
-
-                if(value == VALUE_UNKNOWN || 
-                   (board.getPlayer() == PLAYER_MAX && val > value) ||
-                   (board.getPlayer() == PLAYER_MIN && val < value)) {
-                    value = val;
-                    bestMove = i;
-                }
-            }
-        }
-
-        return value;
-    }
-}
-*/
 GameState reduce(GameState board, unsigned width, unsigned height) {
 
-    Connect4 game(4*Cache::Megabytes);
-    game.setBoardSize(width, height);
+    Config config;
+    config.cacheSize = 4*Cache::Megabytes;
+    config.width = width;
+    config.height = height;
+    Connect4 game(config);
 
     Value minimaxValue = game.minimax(board);
 
@@ -74,8 +40,12 @@ GameState reduce(GameState board, unsigned width, unsigned height) {
 }
 
 bool minimaxTest(unsigned runs, Depth depth, unsigned width, unsigned height) {
-    Connect4 game(64*Cache::Megabytes);
-    game.setBoardSize(width, height);
+    Config config;
+    config.cacheSize = 64*Cache::Megabytes;
+    config.width = width;
+    config.height = height;
+
+    Connect4 game(config);
 
     for(unsigned i=0; i<runs; i++) {
         GameState board = GameState::random(depth, width, height);
@@ -98,7 +68,7 @@ bool minimaxTest(unsigned runs, Depth depth, unsigned width, unsigned height) {
             std::cout << "Minimax value=" << printValue(minimaxValue) << std::endl;
             std::cout << "Alpha-beta value=" << printValue(alphaBetaValue) << std::endl;
 
-//            return false;
+            return false;
         }
 
         std::cout << "." << std::flush;
@@ -107,27 +77,6 @@ bool minimaxTest(unsigned runs, Depth depth, unsigned width, unsigned height) {
     std::cout << std::endl;
 
     return true;
-}
-
-void test() {
-
-    GameState board(805421185, 3223453958, 1, 14);
-
-    std::cout << "Solving..." <<  std::endl;
-    std::cout << board.print() << std::endl;
-
-    unsigned width = 5;
-    unsigned height = 4;
-
-    Connect4 game(64*Cache::Megabytes);
-    game.setBoardSize(width, height);
-
-    Value minimaxValue = game.minimax(board);
-    Value alphaBetaValue = game.solve(board);
-
-    std::cout << "-----------------------" << std::endl;
-    std::cout << "Minimax=" << printValue(minimaxValue) << std::endl;
-    std::cout << "alphaBeta=" << printValue(alphaBetaValue) << std::endl;
 }
 
 int main() {

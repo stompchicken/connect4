@@ -31,37 +31,55 @@ std::ostream& operator<<(std::ostream &output, const Stats &stats);
 
 struct Config {
 
-    Config() : useCache(true),
-               maxCacheDepth(DEPTH_MAX - 8),
+    Config() : width(7),
+               height(6),
+               useCache(true),
+               cacheSize(1*Cache::Megabytes),
+               cacheProbe(8),
+               cacheMaxDepth(DEPTH_MAX),
+               cacheReplacement(true),
+               cachePrefetch(false),
                reorderMoves(true),
-               depthFirstScan(true) {
+               moveStatic(true),
+               moveKiller(true),
+               moveBest(true),
+               preFilter(true),
+               statePooling(true) {
     };
 
+    unsigned width;
+    unsigned height;
+
     bool useCache;
-    Depth maxCacheDepth;
-    bool reorderMoves; 
-    bool depthFirstScan;
+    uint64 cacheSize;
+    unsigned cacheProbe;
+    Depth cacheMaxDepth;
+    bool cacheReplacement;
+    bool cachePrefetch;
+
+    bool reorderMoves;
+    bool moveStatic;
+    bool moveKiller;
+    bool moveBest;
+
+    bool preFilter;
+    bool statePooling;
 };
 std::ostream& operator<<(std::ostream &output, const Config &config);
 
 
 class Connect4 {
   public:
-    Connect4(long cacheSize) : width(7), height(6),
-                               cache(new Cache(cacheSize)),
-                               stats(new Stats()),
-                               statePool(WIDTH*(DEPTH_MAX+1)),
-                               moveOrder(), config() {
+    Connect4(Config conf) : config(conf),
+                            cache(new Cache(conf.cacheSize, conf.cacheProbe, conf.cacheReplacement)),
+                            stats(new Stats()),
+                            statePool(WIDTH*(DEPTH_MAX+1)),
+                            moveOrder(conf.moveStatic, conf.moveKiller, conf.moveBest)  {
     }
 
     ~Connect4() {
         delete cache;
         delete stats;
-    }
-
-    void setBoardSize(unsigned width, unsigned height) {
-        this->width = width;
-        this->height = height;
     }
 
     Value solve(const GameState& board);
@@ -83,13 +101,11 @@ class Connect4 {
     std::string getCacheStats() const { return cache->statistics(); }
 
   private:
-    unsigned width;
-    unsigned height;
+    Config config;
     Cache* cache;
     Stats* stats;
     Pool<GameState> statePool;
     MoveOrder moveOrder;
-    Config config;
 
     // No copying allowed
     Connect4(const Connect4& other);

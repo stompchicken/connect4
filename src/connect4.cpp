@@ -8,18 +8,10 @@
 Value Connect4::solve(const GameState& state) {
     this->reset();
     moveOrder.reset();
-    Move bestMove;
+    Move bestMove = MOVE_INVALID;
     Value value = alphaBeta(state, VALUE_MIN, VALUE_MAX, bestMove);
     return value;
 }
-
-std::string indent(int width) {
-    std::stringstream ss;
-    for(int i=0; i<width; i++) {
-        ss << "    ";
-    }
-    return ss.str();
-} 
 
 Value Connect4::minimax(const GameState& board) {
     Depth depth = board.getDepth();
@@ -32,11 +24,11 @@ Value Connect4::minimax(const GameState& board) {
 
     if(value != VALUE_UNKNOWN) {
         return value;
-    } else if (depth == this->width*this->height) {
+    } else if (depth == config.width*config.height) {
         return VALUE_DRAW;
     } else {
         GameState buffer[WIDTH];
-        board.children(buffer, this->width, this->height);
+        board.children(buffer, config.width, config.height);
 
         value = VALUE_UNKNOWN;
         for(int i=0; i<WIDTH; i++) {
@@ -67,10 +59,14 @@ Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value
     bestMove = MOVE_INVALID;
 #endif
 
+    if(config.cachePrefetch) {
+        cache->prefetch(state);
+    }
+
     Value value = state.evaluate();
     if(value != VALUE_UNKNOWN) {
         return value;
-    } else if(depth == this->height * this->width) {
+    } else if(depth == config.height * config.width) {
         return VALUE_DRAW;
     }
 
@@ -79,7 +75,7 @@ Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value
 
     // Look up state in cache
     Entry cacheEntry;
-    if(config.useCache && depth <= config.maxCacheDepth &&
+    if(config.useCache && depth <= config.cacheMaxDepth &&
        cache->get(state, cacheEntry)) {
             stats->cacheHits++;
             if(cacheEntry.lower == cacheEntry.upper) {
@@ -103,13 +99,23 @@ Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value
 
     // Generate children
     Move moves[WIDTH];
-    PoolEntry<GameState> children = statePool.get(WIDTH);
-    state.children(children.data, this->width, this->height);
+    GameState* children;
+    if(config.statePooling) {
+        PoolEntry<GameState> childArray = statePool.get(WIDTH);
+        children = childArray.data;
+        state.children(children, config.width, config.height);
+    } else {
+        children = &GameState[WIDTH];
+        state.children(children, config.width, config.height);
+
+    }
+
+    state.children(children, config.width, config.height);
 
     // Check for obvious winners
-    if(config.depthFirstScan) {
+    if(config.preFilter) {
         for(Move move=0; move<WIDTH; move++) {
-            const GameState& child = children.data[move];
+            const GameState& child = children[move];
             if(!child.isValid()) continue;
             Value value = child.evaluate();
             if(player == PLAYER_MAX && value == VALUE_MAX) {
@@ -132,7 +138,7 @@ Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value
 
     for(unsigned i=0; i<WIDTH; i++) {
         const Move move = moves[i];
-        const GameState& child = children.data[move];
+        const GameState& child = children[move];
 
         if(!child.isValid()) continue;
 
@@ -163,7 +169,7 @@ Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value
     }
 
     // Store new bounds to cache
-    if(config.useCache && depth <= config.maxCacheDepth) {
+    if(config.useCache && depth <= config.cacheMaxDepth) {
 
         // We need beta == VALUE_MAX because we may have cutoff on a
         // draw because of our bounds, which does not mean a draw is
@@ -203,13 +209,13 @@ void Connect4::principleVariation(const GameState& board, Move buffer[DEPTH_MAX]
     for(Depth depth=board.getDepth(); depth<DEPTH_MAX; depth++) {
 //        std::cout << "Depth=" << (int)depth << std::endl;
         GameState children[WIDTH];
-        state.children(children, this->width, this->height);
+        state.children(children, config.width, config.height);
 
 
         Value value = state.evaluate();
         if(value != VALUE_UNKNOWN) {
             buffer[depth] = MOVE_INVALID;
-        } else if(depth >= this->width * this->height) {
+        } else if(depth >= config.width * config.height) {
             buffer[depth] = MOVE_INVALID;
         } else {
 
@@ -227,4 +233,20 @@ void Connect4::principleVariation(const GameState& board, Move buffer[DEPTH_MAX]
             }
         }
     }
+}
+
+
+std::ostream& operator<<(std::ostream &output, const Config &config) {
+    output << "{boardSize: " << config.width << "x" << config.height << ", ";
+    output << "caching: " << (config.useCache ? "enabled" : "disabled") << ", ";
+    if(config.useCache) {
+        output << "cacheSize: " << config.cacheSize << ", ";
+        output << "cacheProbe: " << config.cacheProbe << ", ";
+        output << "cacheMaxDepth: " << (int)config.cacheMaxDepth << ", ";
+    }
+
+    output << "reordering: " << (config.reorderMoves ? "enabled" : "disabled") << ", ";
+    output << "prefilter: " << (config.preFilter ? "enabled" : "disabled") << "}";
+
+    return output;
 }

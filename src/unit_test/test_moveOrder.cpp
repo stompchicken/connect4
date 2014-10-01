@@ -3,7 +3,7 @@
 
 TEST_CASE("Moves::staticOrder") {
 
-    MoveOrder moveOrder;
+    MoveOrder moveOrder(true, false, false);
     Move moves[WIDTH];
     moveOrder.getStaticOrder(moves);
     REQUIRE(moves[0] == 3);
@@ -29,7 +29,7 @@ TEST_CASE("Moves::staticOrder") {
 
 TEST_CASE("Moves::reorder") {
 
-    MoveOrder moveOrder;
+    MoveOrder moveOrder(true, true, true);
     Move moves[WIDTH];
     Depth depth = 2;
 

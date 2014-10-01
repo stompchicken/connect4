@@ -3,7 +3,9 @@
 
 TEST_CASE("Connect4::alphaBeta") {
 
-    Connect4 game(1*Cache::Megabytes);
+    Config config;
+    config.cacheSize = 1*Cache::Megabytes;
+    Connect4 game(config);
 
     {
         GameState board = GameState::parse(

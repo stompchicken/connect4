@@ -9,9 +9,12 @@
 class MoveOrder {
 
   public:
-    MoveOrder() {
+    MoveOrder(bool staticMove, bool killerMove, bool bestMove) {
         Move moves[WIDTH] = {3, 2, 4, 1, 5, 0, 6};
         setStaticOrder(moves);
+        useStaticMove = staticMove;
+        useKillerMove = killerMove;
+        useBestMove = bestMove;
         reset();
     }
 
@@ -26,9 +29,14 @@ class MoveOrder {
     void reorder(Depth depth, Move bestMove, Move* moves) const;
 
   private:
+    bool useStaticMove;
     Move staticMoves[WIDTH];
     uint64 staticMoveValue[WIDTH];
+
+    bool useKillerMove;
     Move killerMove[DEPTH_MAX+1];
+
+    bool useBestMove;
 };
 
 

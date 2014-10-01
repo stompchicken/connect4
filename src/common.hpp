@@ -9,6 +9,7 @@
 #define HEIGHT 6
 #define SIZE   WIDTH*(HEIGHT+1)
 
+typedef int64_t int64;
 typedef uint64_t uint64;
 typedef uint32_t uint32;
 typedef uint8_t uint8;

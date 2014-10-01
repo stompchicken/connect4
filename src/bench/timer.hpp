@@ -1,43 +1,45 @@
 #ifndef TIMER
 #define TIMER
 
+#include "common.hpp"
+
 #include <ctime>
 #include <iostream>
+#include <limits>
+#include <vector>
+#include <time.h>
 
 class Timer {
 
+#define BILLION 1E9
+
 public:
-    Timer() {
-        n = 0;
-        mean = 0.0;
+    Timer() : n(0) {
     }
 
     void start() {
-        time = std::clock();
+        clock_gettime(CLOCK_MONOTONIC, &begin);
     }
 
     void stop() {
-        update((std::clock() - time) / (double) CLOCKS_PER_SEC);
+        clock_gettime(CLOCK_MONOTONIC, &end);
+        int64 seconds = end.tv_sec - begin.tv_sec;
+        int64 nanos = end.tv_nsec - begin.tv_nsec;
+        update(seconds + nanos/BILLION);
     }
 
-    double getMean() { return mean; }
+    double getQuantile(double q) const;
 
     friend std::ostream& operator<<(std::ostream& os, const Timer& timer);
 
 private:
-    std::clock_t time;
+    struct timespec begin, end;
+
     long n;
-    double min;
-    double max;
-    double mean;
-
-    void update(double duration) {
-        n++;
-        mean += (duration - mean) / n;
-        max = std::max(max, duration);
-        min = std::min(min, duration);
-    }
-
+    // I am a bad person for doing this...
+    mutable std::vector<double> durations;
+    
+    void update(double duration);
 };
 
 

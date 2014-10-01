@@ -4,9 +4,12 @@ ifdef DEBUG
 OPTFLAGS=-g
 CFLAGS=-DDEBUG
 else
-OPTFLAGS=-O3 -ftree-vectorize -msse2 -funroll-loops
+OPTFLAGS=-O3 -ftree-vectorize -march=native -funroll-loops
 CFLAGS=-DNDEBUG
 endif
+
+
+CFLAGS+=-Wno-variadic-macros -Wno-long-long
 
 CFLAGS+=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include -Wextra -pedantic #-Weverything
 LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib

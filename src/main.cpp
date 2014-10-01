@@ -59,13 +59,18 @@ int main(int argc, char* argv[]) {
     Depth depth = static_cast<Depth>(std::atoi(argv[1]));
     size_t cacheSize = static_cast<size_t>(std::atoi(argv[2])) * Cache::Megabytes;
 
-    Connect4 game(cacheSize);
+    Config config;
+    config.cacheSize = cacheSize;
 
     if(argc == 5) {
         unsigned width = static_cast<unsigned>(std::atoi(argv[3]));
         unsigned height = static_cast<unsigned>(std::atoi(argv[4]));
-        game.setBoardSize(width, height);
+        config.width = width;
+        config.height = height;
     }
+
+    std::cout << config << std::endl;
+    Connect4 game(config);
 
     GameState state = GameState::random(depth);
 
