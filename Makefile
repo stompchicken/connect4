@@ -8,11 +8,11 @@ OPTFLAGS=-O3 -ftree-vectorize -march=native -funroll-loops
 CFLAGS=-DNDEBUG
 endif
 
+# Suppress Catch warnings
+CFLAGS+=-Wno-variadic-macros -Wno-long-long
 
-#CFLAGS+=-Wno-variadic-macros -Wno-long-long
-
-CFLAGS+=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include -Wextra -pedantic #-Weverything -Wno-global-constructors -Wno-padded -Wno-exit-time-destructors
-LDFLAGS=$(OPTFLAGS) -lpthread -lrt -lncurses -L/usr/local/opt/ncurses/lib
+CFLAGS+=$(OPTFLAGS) -Wall -Wextra -pedantic
+LDFLAGS=$(OPTFLAGS) -lpthread -lrt -lncurses
 
 CONNECT4_SRC=$(wildcard src/*.cpp)
 CONNECT4_OBJ=$(patsubst src/%.cpp, build/%.o, $(CONNECT4_SRC))
