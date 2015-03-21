@@ -1,3 +1,5 @@
+![Travis build status](https://travis-ci.org/stompchicken/connect4.svg?branch=master)
+
 Solving Connect Four
 --------------------
 Computing an optimal strategy for Connect Four.
