@@ -64,6 +64,12 @@ class Cache {
   private:
     // Number of entries in the hashtable
     const uint64 capacity;
+    // Size of the linear probing before returning failure
+    // (The size of a cache line in modern Intel chips is 64 bytes)
+    const uint64 probe;
+    // Replace entries with less deep ones
+    const bool replacement;
+
     // Count of entries
     uint64 size;
     // Contains key, value pairs
@@ -72,12 +78,6 @@ class Cache {
     // Keep counts of how many states of each depth are in the cache
     mutable uint64 counts[DEPTH_MAX];
 
-    // Size of the linear probing before returning failure
-    // (The size of a cache line in modern Intel chips is 64 bytes)
-    const uint64 probe;
-
-    // Replace entries with less deep ones
-    const bool replacement;
 
     // No copying
     Cache(const Cache& other);

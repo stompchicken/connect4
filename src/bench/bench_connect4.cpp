@@ -37,8 +37,7 @@ void cacheSize() {
 }
 
 void benchConnect4() {
-
-    
+   
     Config config;
     config.width = 6;
     config.height = 5;
@@ -46,47 +45,48 @@ void benchConnect4() {
     std::cout << config << std::endl;
     std::cout << "solve: " << solveGame(config) << std::endl;
     
-    cacheSize();
-
-
-/*    
-
-    solveGame(config);
-
     {
         Config conf(config);
         conf.cacheSize = 256*Cache::Megabytes;
-        solveGame(conf);
+        std::cout << conf << std::endl;
+        std::cout << "solve: " << solveGame(conf) << std::endl;
     }
 
     {
         Config conf(config);
         conf.cacheMaxDepth = 20;
-        solveGame(conf);
+        std::cout << conf << std::endl;
+        std::cout << "solve: " << solveGame(conf) << std::endl;
     }
 
     {
         Config conf(config);
         conf.reorderMoves = false;
-        solveGame(conf);
+        std::cout << conf << std::endl;
+        std::cout << "solve: " << solveGame(conf) << std::endl;
     }
 
     {
         Config conf(config);
-        conf.moveFilter = false;
-        solveGame(conf);
+        conf.preFilter = false;
+        std::cout << conf << std::endl;
+        std::cout << "solve: " << solveGame(conf) << std::endl;
     }
 
     {
         Config conf(config);
-        conf.cacheProbe = 256;
-        solveGame(conf);
+        conf.cacheProbe = 16;
+        std::cout << conf << std::endl;
+        std::cout << "solve: " << solveGame(conf) << std::endl;
     }
 
     {
         Config conf(config);
         conf.useCache = false;
-        solveGame(conf);
+        std::cout << conf << std::endl;
+        std::cout << "solve: " << solveGame(conf) << std::endl;
     }
-*/
+
+//    cacheSize();
+
 }

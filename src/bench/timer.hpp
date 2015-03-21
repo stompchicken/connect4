@@ -29,14 +29,16 @@ public:
     }
 
     double getQuantile(double q) const;
+    uint64 getSampleCount() const { return n; }
 
     friend std::ostream& operator<<(std::ostream& os, const Timer& timer);
 
 private:
     struct timespec begin, end;
 
-    long n;
-    // I am a bad person for doing this...
+    uint64 n;
+    // Required for getQuantile to be const
+    // This feels pretty bad
     mutable std::vector<double> durations;
     
     void update(double duration);

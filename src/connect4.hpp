@@ -43,9 +43,8 @@ struct Config {
                moveStatic(true),
                moveKiller(true),
                moveBest(true),
-               preFilter(true),
-               statePooling(true) {
-    };
+               preFilter(true) {
+    }
 
     unsigned width;
     unsigned height;
@@ -63,7 +62,6 @@ struct Config {
     bool moveBest;
 
     bool preFilter;
-    bool statePooling;
 };
 std::ostream& operator<<(std::ostream &output, const Config &config);
 

@@ -51,10 +51,13 @@ void unpackEntry(const Packed& value, Key& key, Entry& entry) {
 }
 
 Cache::Cache(uint64 capacity_, uint64 probe_, bool replace) : 
-    capacity(capacity_), probe(probe_), replacement(replace) {
-    size = 0;
-    // Zero out the hashtable
-    hashtable = new uint64_t[capacity]();
+    capacity(capacity_), probe(probe_), replacement(replace), size(0),
+    hashtable(new uint64_t[capacity]) {
+
+    for(uint64 i=0; i<capacity; i++) {
+        this->hashtable[i] = 0;
+    }
+
     for(int i=0; i<DEPTH_MAX; i++) {
         counts[i] = 0;
     }

@@ -9,11 +9,11 @@
 class MoveOrder {
 
   public:
-    MoveOrder(bool staticMove, bool killerMove, bool bestMove) {
+    MoveOrder(bool staticMove, bool killer, bool bestMove) {
         Move moves[WIDTH] = {3, 2, 4, 1, 5, 0, 6};
         setStaticOrder(moves);
         useStaticMove = staticMove;
-        useKillerMove = killerMove;
+        useKillerMove = killer;
         useBestMove = bestMove;
         reset();
     }

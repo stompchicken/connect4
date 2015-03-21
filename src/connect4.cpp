@@ -3,8 +3,6 @@
 #include <math.h>
 #include <sstream>
 
-#define MAX_CACHE_DEPTH WIDTH*HEIGHT - 4
-
 Value Connect4::solve(const GameState& state) {
     this->reset();
     moveOrder.reset();
@@ -100,16 +98,8 @@ Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value
     // Generate children
     Move moves[WIDTH];
     GameState* children;
-    if(config.statePooling) {
-        PoolEntry<GameState> childArray = statePool.get(WIDTH);
-        children = childArray.data;
-        state.children(children, config.width, config.height);
-    } else {
-        children = &GameState[WIDTH];
-        state.children(children, config.width, config.height);
-
-    }
-
+    PoolEntry<GameState> childArray = statePool.get(WIDTH);
+    children = childArray.data;
     state.children(children, config.width, config.height);
 
     // Check for obvious winners
@@ -117,7 +107,7 @@ Value Connect4::alphaBeta(const GameState& state, const Value alpha, const Value
         for(Move move=0; move<WIDTH; move++) {
             const GameState& child = children[move];
             if(!child.isValid()) continue;
-            Value value = child.evaluate();
+            value = child.evaluate();
             if(player == PLAYER_MAX && value == VALUE_MAX) {
                 bestMove = move;
                 return VALUE_MAX;

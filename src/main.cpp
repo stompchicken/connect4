@@ -8,6 +8,9 @@
 
 bool terminate = false;
 
+void* statsLoop(void *arg);
+void printStats(const Connect4& game, double duration);
+
 void printStats(const Connect4& game, double duration) {
     const Stats& stats = game.getStats();
     clear();

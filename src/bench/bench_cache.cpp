@@ -1,56 +1,59 @@
 #include "cache.hpp"
 #include "timer.hpp"
 
-Timer putGet(Cache& cache, uint64 entries) {
+#include <vector>
+#include <fstream>
 
-    Timer timer;
+// To avoid being optimised out
+static Entry entry;
+static Entry defaultEntry = {VALUE_MIN, VALUE_MAX, 0, MOVE_INVALID};
 
-    Entry cacheEntry = {VALUE_MIN, VALUE_MAX, 0, MOVE_INVALID};
-    for(uint64 i=0; i<entries; i++) {
-        Depth depth = rand() % 48;
-        GameState state = GameState::random(depth);
-        cacheEntry.depth = depth;
-        timer.start();
-        cache.put(state, cacheEntry);
-        timer.stop();
+void walkTree(const GameState& node, unsigned width, unsigned height,
+         Cache& cache, Timer& timer, size_t maxSamples) {
+    timer.start();
+    cache.get(node, entry);
+    timer.stop();
+
+    GameState children[WIDTH];
+    node.children(children, width, height);
+
+    for(unsigned i=0; i<WIDTH; i++) {
+        if(timer.getSampleCount() > maxSamples) return;
+
+        const GameState& child = children[i];
+        if(!child.isValid()) continue;
+
+        walkTree(child, width, height, cache, timer, maxSamples);
     }
 
-    for(uint64 i=0; i<entries; i++) {
-        Depth depth = rand() % 48;
-        GameState state = GameState::random(depth);
-        cacheEntry.depth = depth;
-        timer.start();
-        cache.get(state, cacheEntry);
-        timer.stop();
-    }
-    
-    return timer;
+    cache.put(node, defaultEntry);
 }
 
-void probe() {
-
-    uint64 size = 4*Cache::Megabytes;
-    uint64 entries = size/2;
-
-    std::cout << "Cache of " << size << " bytes" << std::endl;
-    std::cout << "Put/Get " << entries << " entries" << std::endl;
-
-    for(unsigned probe=4; probe<1024; probe*=2) {
-        Cache cache(size, probe);
-        std::cout << "probe." << probe << ": " << putGet(cache, entries) << std::endl;
-    }
-}
 
 void benchCache() {
 
-    {
-        uint64 size = 4*Cache::Megabytes;
-        Cache cache(size);
-        uint64 entries = size;
-        std::cout << "Cache of " << size << " bytes" << std::endl;
-        std::cout << "Put/Get " << entries << " entries" << std::endl;
-        std::cout << "putGet: " << putGet(cache, entries) << std::endl;
+    uint64 size = 4;
+    uint64 entries = 1024*1024*8;
+
+    std::cout << "Cache of " << size << " MBs" << std::endl;
+    std::cout << "Put/Get " << entries << " entries" << std::endl;
+
+    std::vector<uint64> probes;
+    probes.push_back(2);
+    probes.push_back(4);
+    probes.push_back(8);
+    probes.push_back(16);
+    probes.push_back(32);
+    probes.push_back(64);
+
+    GameState state = GameState::random(16, 6, 5);
+
+    for(unsigned i=0; i<probes.size(); i++) {
+        uint64 probe = probes[i];
+        Cache cache(size * Cache::Megabytes, probe);
+        Timer timer;
+        walkTree(state, 6, 5, cache, timer, entries);
+        std::cout << "probe." << probe << ": " << timer << std::endl;
     }
 
-    probe();
 }

@@ -38,19 +38,21 @@ GameState& GameState::operator=(const GameState& other) {
 }
 
 GameState GameState::random(Depth moves, unsigned width, unsigned height) {
+#ifdef DEBUG
+    assert(moves <= DEPTH_MAX && moves <= width * height);
+#endif
+
     GameState board;
-//    do {
-        board = GameState();
-        for(unsigned i=0; i<moves; i++) {
-            GameState nodeBuffer[WIDTH];
-            board.children(nodeBuffer, width, height);
-            unsigned offset = static_cast<unsigned>(rand());
-            for(unsigned j=0; j<width; j++) {
-                board = nodeBuffer[(j + offset) % width];
-                if(board.isValid()) break;
-            }
+    board = GameState();
+    for(unsigned i=0; i<moves; i++) {
+        GameState nodeBuffer[WIDTH];
+        board.children(nodeBuffer, width, height);
+        unsigned offset = static_cast<unsigned>(rand());
+        for(unsigned j=0; j<width; j++) {
+            board = nodeBuffer[(j + offset) % width];
+            if(board.isValid()) break;
         }
-//    } while (board.evaluate() != VALUE_UNKNOWN);
+    }
     return board;
 }
 
@@ -221,16 +223,3 @@ inline void GameState::makeMove(unsigned row, unsigned col) {
     this->emptyPos[col] += 1;
 
 }
-
-uint64 flipLeftRight(uint64 x) {
-    uint64 output = 0;
-    for(unsigned row=0; row<HEIGHT; row++) {
-        for(unsigned col=0; col<WIDTH; col++) {
-            if (x & Bitboard::toMask(row, col)) {
-                output |= Bitboard::toMask(row, WIDTH-1-col);
-            }
-        }
-    }
-    return output;
-}
-

@@ -9,9 +9,9 @@ CFLAGS=-DNDEBUG
 endif
 
 
-CFLAGS+=-Wno-variadic-macros -Wno-long-long
+#CFLAGS+=-Wno-variadic-macros -Wno-long-long
 
-CFLAGS+=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include -Wextra -pedantic #-Weverything
+CFLAGS+=$(OPTFLAGS) -Wall -I/usr/local/opt/ncurses/include -Wextra -pedantic #-Weverything -Wno-global-constructors -Wno-padded -Wno-exit-time-destructors
 LDFLAGS=$(OPTFLAGS) -lpthread -lncurses -L/usr/local/opt/ncurses/lib
 
 CONNECT4_SRC=$(wildcard src/*.cpp)
