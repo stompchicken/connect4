@@ -2,7 +2,10 @@
 
 Solving Connect Four
 --------------------
-Computing an optimal strategy for Connect Four.
+This program computes the minimax value of the game Connect Four (it's a win for the first player). The algorithm is simple alpha-beta but there are a number of implementation tricks needed to get it to work quickly enough. The main ones are:
+  * Bitboards to represent the game state and test for winning states
+  * Caching of state values
+  * Child reordering and early pruning
 
 Usage
 -----
